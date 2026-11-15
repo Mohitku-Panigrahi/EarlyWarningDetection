@@ -1,6 +1,12 @@
 from typing import Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
+
+try:
+    import email_validator  # noqa: F401
+    from pydantic import EmailStr
+except (ImportError, Exception):
+    EmailStr = str
 
 class Token(BaseModel):
     access_token: str
