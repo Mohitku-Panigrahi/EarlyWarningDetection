@@ -2,6 +2,12 @@
 **Explainable Academic Early-Warning, Multi-Role Intelligence & Human-in-the-Loop Governance**  
 *Lovely Professional University (LPU) • School of Computer Science & Engineering (CSE276: AI Foundations)*
 
+<p align="center">
+  <img src="documentation/screenshots/eduvance_mascot.png" alt="Eduvance Calibrated Risk Model Mascot" width="280" />
+  <br />
+  <em>“Find focus, peace, and explainable insight in every academic decision.” — Calibrated Risk Model Active</em>
+</p>
+
 ---
 
 ## 1. System Overview
