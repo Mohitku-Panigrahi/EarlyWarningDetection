@@ -1,0 +1,19 @@
+name: Deploy Status
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  production-deployment:
+    name: Production Environment Link
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://earlywarningdetection.onrender.com
+    steps:
+      - name: Health Check Live Web Service
+        run: |
+          echo "EarlyWarningDetection is deployed live at https://earlywarningdetection.onrender.com"
+          curl -s -f https://earlywarningdetection.onrender.com/api/v1/health || exit 0

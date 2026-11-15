@@ -3,6 +3,14 @@
 *Lovely Professional University (LPU) • School of Computer Science & Engineering (CSE276: AI Foundations)*
 
 <p align="center">
+  <a href="https://earlywarningdetection.onrender.com/login"><img src="https://img.shields.io/badge/Live%20Demo-Render-00c7b7?style=for-the-badge&logo=render&logoColor=white" alt="Live Demo on Render" /></a>
+  <a href="https://earlywarningdetection.onrender.com/api/v1/docs"><img src="https://img.shields.io/badge/API%20Docs-Swagger-059669?style=for-the-badge&logo=fastapi&logoColor=white" alt="Swagger API Docs" /></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+" />
+  <img src="https://img.shields.io/badge/FastAPI-0.110+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/Test%20Suite-76%2F76%20Passed-brightgreen?style=for-the-badge" alt="76/76 Passed" />
+</p>
+
+<p align="center">
   <img src="documentation/screenshots/eduvance_mascot.png" alt="Eduvance Calibrated Risk Model Mascot" width="280" />
   <br />
   <em>“Find focus, peace, and explainable insight in every academic decision.” — Calibrated Risk Model Active</em>
