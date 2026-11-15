@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="web_dashboard" name="shell-type">
+  <title>Faculty Mentor Workspace — LPU-RISK-01</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            },
+            warmBg: '#f7ebe3',
+            cardBg: '#faeee5',
+            matcha: '#b5d774',
+            coralPill: '#ff8a73',
+            primary: "#ea580c",
+            "primary-container": "#c2410c",
+            "on-primary": "#ffffff",
+            secondary: "#2b2623",
+            surface: "#f7ebe3",
+            "on-surface": "#292320"
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          boxShadow: {
+            'glow-orange': '0 10px 25px -4px rgba(234, 88, 12, 0.4)',
+            'floating-card': '0 16px 36px -8px rgba(180, 140, 125, 0.18), 0 4px 12px -2px rgba(180, 140, 125, 0.08)',
+            'inner-glow': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.9)'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f7ebe3;
+      color: #292320;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 14px 34px -8px rgba(180, 140, 125, 0.18), 0 4px 12px -2px rgba(180, 140, 125, 0.06);
+    }
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 42px -8px rgba(180, 140, 125, 0.25), 0 6px 14px -2px rgba(180, 140, 125, 0.1);
+      border-color: #ffffff;
+    }
+    .active-nav-tab {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 4px 14px -2px rgba(234, 88, 12, 0.38);
+    }
+    .inactive-nav-tab {
+      background-color: rgba(255, 255, 255, 0.65);
+      color: #786c65;
+      font-weight: 600;
+    }
+    .inactive-nav-tab:hover {
+      background-color: #ffffff;
+      color: #292320;
+    }
+    .active-filter {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 4px 12px -2px rgba(234, 88, 12, 0.35);
+    }
+    .inactive-filter {
+      background-color: rgba(255, 255, 255, 0.65);
+      color: #786c65;
+    }
+    .inactive-filter:hover {
+      background-color: #ffffff;
+      color: #292320;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f7ebe3] relative overflow-x-hidden">
+
+  <!-- Ambient Glow Background Circles (Login page match) -->
+  <div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#fdd8c5]/40 blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-[#fae1d2]/50 blur-3xl"></div>
+  </div>
+
+  <!-- Mobile Backdrop -->
+  <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0"></div>
+
+  <!-- Collapsible Navigation Drawer -->
+  <aside id="sidebarDrawer" class="fixed left-0 top-0 h-full w-64 bg-white/95 backdrop-blur-md shadow-2xl z-50 flex flex-col justify-between -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#fae1d2]">
+    <div class="flex flex-col flex-1">
+      <div class="h-16 px-4 flex items-center justify-between border-b border-[#fae1d2]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+            ED
+          </div>
+          <div>
+            <div class="font-bold text-sm text-[#292320] tracking-tight">EDUVANCE</div>
+            <div class="text-[11px] text-stone-500">Mentor Decision Support</div>
+          </div>
+        </div>
+        <button onclick="toggleSidebar()" class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-stone-100 transition-colors" title="Close Drawer">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="px-4 py-2">
+        <span class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Navigation</span>
+      </div>
+
+      <nav class="flex-1 px-3 space-y-1">
+        <button onclick="switchView('overview')" id="snav-overview" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-600 text-white text-left shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">dashboard</span>
+          <span>1. Overview</span>
+        </button>
+        <button onclick="switchView('students')" id="snav-students" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-[18px]">group</span>
+            <span>2. Students</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-bold" id="drawer-student-count">10</span>
+        </button>
+        <button onclick="switchView('analytics')" id="snav-analytics" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <span class="material-symbols-outlined text-[18px]">analytics</span>
+          <span>3. Academic Analytics</span>
+        </button>
+        <button onclick="switchView('tasks')" id="snav-tasks" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-[18px]">task_alt</span>
+            <span>4. Task Management</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold" id="drawer-recs-count">!</span>
+        </button>
+        
+        <div class="pt-3 pb-1 px-1">
+          <span class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Research & Lab</span>
+        </div>
+        <a href="/lab" class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-orange-700 hover:bg-orange-50 transition-colors">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-[18px] text-orange-600">science</span>
+            <span>Algorithm & AI Lab</span>
+          </div>
+          <span class="px-1.5 py-0.5 rounded text-[10px] bg-orange-100 text-orange-800 font-bold">CSE276</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Mentor Profile Footer -->
+    <div class="p-3 m-3 bg-[#faeee5] rounded-2xl flex items-center justify-between border border-[#eddcd2]">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-xs font-bold shadow-sm" id="drawer-initials">
+          MS
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs font-bold text-[#292320] truncate" id="drawer-mentor-name">Dr. Manoj Saini</div>
+          <div class="text-[10px] text-stone-500 truncate" id="drawer-faculty-code">Code: F08 • Dept CSE</div>
+        </div>
+      </div>
+      <button onclick="logout()" class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Logout">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Top Fixed App Header -->
+  <header class="fixed top-0 left-0 right-0 h-16 bg-[#f7ebe3]/90 backdrop-blur-md border-b border-[#fae1d2] z-30 flex items-center justify-between px-4 sm:px-6">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleSidebar()" class="w-9 h-9 rounded-xl flex items-center justify-center text-stone-600 hover:bg-white/80 transition-colors" aria-label="Toggle Navigation">
+        <span class="material-symbols-outlined text-[22px]">menu</span>
+      </button>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-black text-xs shadow-sm">
+          ED
+        </div>
+        <span class="font-extrabold text-sm text-[#292320] tracking-tight hidden sm:inline">Mentor Decision Workspace</span>
+        <span class="text-stone-300 hidden sm:inline">|</span>
+        <span class="text-xs text-stone-500 font-medium hidden md:inline" id="header-mentor-name">Dr. Manoj Saini (F08)</span>
+      </div>
+    </div>
+
+    <!-- 4 Navigation Group Tabs (Top Center) -->
+    <div class="hidden md:flex items-center gap-1.5 bg-white/70 p-1 rounded-2xl border border-white/80 text-xs shadow-sm">
+      <button onclick="switchView('overview')" id="tnav-overview" class="px-3.5 py-1.5 rounded-xl active-nav-tab transition-all">Overview</button>
+      <button onclick="switchView('students')" id="tnav-students" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all">Students</button>
+      <button onclick="switchView('analytics')" id="tnav-analytics" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all">Analytics</button>
+      <button onclick="switchView('tasks')" id="tnav-tasks" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all flex items-center gap-1">
+        <span>Tasks</span>
+        <span class="w-2 h-2 rounded-full bg-amber-500" id="tnav-task-dot"></span>
+      </button>
+    </div>
+
+    <!-- Quick Action & Avatar -->
+    <div class="flex items-center gap-2.5">
+      <button onclick="openLogMeetingModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white/80 hover:bg-white text-stone-700 border border-[#eddcd2] rounded-xl text-xs font-bold shadow-sm transition-all">
+        <span class="material-symbols-outlined text-[16px]">record_voice_over</span>
+        <span class="hidden sm:inline">Log Meeting</span>
+      </button>
+      <button onclick="openAssignTaskModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold shadow-[0_8px_20px_-4px_rgba(234,88,12,0.4)] transition-all">
+        <span class="material-symbols-outlined text-[16px]">add_task</span>
+        <span class="hidden sm:inline">Assign Task</span>
+      </button>
+      <div class="h-6 w-px bg-[#eddcd2]"></div>
+      <div class="w-8 h-8 rounded-full bg-white border border-[#eddcd2] flex items-center justify-center text-orange-600 font-bold text-xs shadow-sm" id="header-avatar">
+        MS
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container with 4 Distinct Views -->
+  <main class="relative z-10 pt-20 pb-16 px-4 sm:px-6 max-w-7xl mx-auto space-y-5">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: OVERVIEW -->
+    <!-- ========================================================================= -->
+    <div id="view-overview" class="space-y-5">
+      
+      <!-- Welcome Hero Banner -->
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h1 class="text-xl sm:text-2xl font-extrabold text-[#292320] tracking-tight" id="mentor-greeting">Mentor Overview: Dr. Manoj Saini</h1>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100/70 text-emerald-800 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Live Decision Session</span>
+            </span>
+            <span class="text-xs text-stone-500 font-medium px-2 py-0.5 rounded-full bg-white/70 border border-[#eddcd2]" id="cohort-tag">Cohort: CSE-402 • 10 Mentees</span>
+          </div>
+          <p class="text-xs sm:text-sm text-stone-600">
+            Early-warning triage for your 10 allocated mentees. Review risk distribution and assign recovery milestones.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 self-start md:self-auto flex-shrink-0">
+          <button onclick="switchView('tasks')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-orange-50 hover:bg-orange-100 text-orange-900 border border-orange-200/80 rounded-xl text-xs font-bold transition-all">
+            <span class="material-symbols-outlined text-[16px] text-orange-700">recommend</span>
+            <span>Task Recommendations</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 6-Metric Cohort KPI Row -->
+      <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="glass-card glass-card-hover rounded-[22px] p-3.5 flex flex-col justify-between">
+          <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Total Mentees</div>
+          <div class="my-1.5">
+            <span class="text-2xl font-black text-[#292320]" id="kpi-total-mentees">10</span>
+            <span class="text-[11px] text-stone-500 font-medium">students</span>
+          </div>
+          <div class="text-[10px] text-stone-400">Allocated quota</div>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-[22px] p-3.5 flex flex-col justify-between">
+          <div class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">On Track</div>
+          <div class="my-1.5">
+            <span class="text-2xl font-black text-emerald-800" id="kpi-ontrack-count">8</span>
+            <span class="text-[11px] text-emerald-600 font-bold" id="kpi-ontrack-pct">80%</span>
+          </div>
+          <div class="text-[10px] text-emerald-600">Meeting benchmarks</div>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-[22px] p-3.5 flex flex-col justify-between">
+          <div class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">On Watch</div>
+          <div class="my-1.5">
+            <span class="text-2xl font-black text-amber-800" id="kpi-watch-count">0</span>
+            <span class="text-[11px] text-amber-600 font-bold" id="kpi-watch-pct">0%</span>
+          </div>
+          <div class="text-[10px] text-amber-600">Early attention</div>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-[22px] p-3.5 flex flex-col justify-between">
+          <div class="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Needs Review</div>
+          <div class="my-1.5">
+            <span class="text-2xl font-black text-rose-800" id="kpi-review-count">2</span>
+            <span class="text-[11px] text-rose-600 font-bold" id="kpi-review-pct">20%</span>
+          </div>
+          <div class="text-[10px] text-rose-600">Immediate action</div>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-[22px] p-3.5 flex flex-col justify-between">
+          <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Cohort Att. Avg</div>
+          <div class="my-1.5">
+            <span class="text-2xl font-black text-[#292320]" id="kpi-avg-attendance">86.4%</span>
+          </div>
+          <div class="text-[10px] text-stone-400">Institutional goal: 85%</div>
+        </div>
+
+        <div class="glass-card glass-card-hover rounded-[22px] p-3.5 flex flex-col justify-between">
+          <div class="text-[10px] font-bold text-orange-700 uppercase tracking-wider">Pending Tasks</div>
+          <div class="my-1.5">
+            <span class="text-2xl font-black text-orange-800" id="kpi-active-tasks">--</span>
+            <span class="text-[11px] text-stone-500 font-medium">in-flight</span>
+          </div>
+          <div class="text-[10px] text-stone-400">Recovery milestones</div>
+        </div>
+      </section>
+
+      <!-- Overview Analytical Charts (Donut + Trajectory Bar Chart) -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Chart 1: Cohort Risk Distribution Donut (5 Cols) -->
+        <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Status Distribution</h3>
+                <p class="text-xs text-slate-500">Breakdown of cohort across early-warning tiers.</p>
+              </div>
+              <span class="text-[10px] font-semibold bg-slate-100 px-2 py-0.5 rounded text-slate-600">N=10 Mentees</span>
+            </div>
+            <div class="relative w-full h-[180px] pt-3 flex items-center justify-center">
+              <canvas id="overviewRiskDonut"></canvas>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs">
+            <div>
+              <span class="text-[10px] text-emerald-700 font-bold block">On Track</span>
+              <span class="font-extrabold text-slate-800" id="donut-ontrack-val">8</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-amber-700 font-bold block">Watch</span>
+              <span class="font-extrabold text-slate-800" id="donut-watch-val">0</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-red-700 font-bold block">Needs Review</span>
+              <span class="font-extrabold text-slate-800" id="donut-review-val">2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart 2: Trajectory Trends Breakdown (7 Cols) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Cohort Academic Velocity</h3>
+                <p class="text-xs text-slate-500">Longitudinal trend direction computed via OLS regression over W1–W6.</p>
+              </div>
+              <span class="text-xs font-semibold text-secondary">Ordinary Least Squares</span>
+            </div>
+            <div class="relative w-full h-[180px] pt-3">
+              <canvas id="overviewTrajectoryBar"></canvas>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Improving: Slope &gt; +0.8 • Declining: Slope &lt; -0.8</span>
+            <button onclick="switchView('analytics')" class="text-primary font-semibold hover:underline">Full Analytics →</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Priority Action Queue -->
+      <section class="glass-card rounded-2xl p-5 sm:p-6 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-red-600 text-[22px]">priority_high</span>
+            <div>
+              <h2 class="text-sm font-bold text-primary uppercase tracking-wider">Priority Review Queue</h2>
+              <p class="text-xs text-slate-500">Students flagged by academic models requiring timely mentor consultation or task assignment.</p>
+            </div>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200" id="pq-badge-count">
+            2 pending items
+          </span>
+        </div>
+        <div id="priority-queue-list" class="space-y-2.5 pt-1">
+          <div class="py-6 text-center text-slate-400 text-xs">Loading priority queue...</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: STUDENTS (ROSTER & DEEP-DIVE DRAWER) -->
+    <!-- ========================================================================= -->
+    <div id="view-students" class="hidden space-y-6">
+      
+      <!-- Search & Filters Bar -->
+      <section class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[22px]">group</span>
+              <h2 class="text-base font-bold text-primary">Assigned Mentee Cohort</h2>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700" id="roster-total-pill">10 Students</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Filter, inspect evidence, and view comprehensive academic telemetry for all allocated students.</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative w-48 sm:w-64">
+              <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-slate-400">search</span>
+              <input type="text" id="rosterSearch" placeholder="Search student name or reg no..." 
+                     class="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+            </div>
+
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-medium">
+              <button onclick="filterMenteeStatus('ALL')" id="filter-pill-ALL" class="px-2.5 py-1 rounded-lg active-filter transition-colors">
+                All (<span id="count-pill-all">10</span>)
+              </button>
+              <button onclick="filterMenteeStatus('NEEDS REVIEW')" id="filter-pill-NEEDS REVIEW" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors text-red-700">
+                Needs Review (<span id="count-pill-review">2</span>)
+              </button>
+              <button onclick="filterMenteeStatus('WATCH')" id="filter-pill-WATCH" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors text-amber-700">
+                Watch (<span id="count-pill-watch">0</span>)
+              </button>
+              <button onclick="filterMenteeStatus('ON TRACK')" id="filter-pill-ON TRACK" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors text-emerald-700">
+                On Track (<span id="count-pill-ontrack">8</span>)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roster Data Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+                <th class="py-2.5 px-3 rounded-l-lg">Student Profile</th>
+                <th class="py-2.5 px-3">Registration</th>
+                <th class="py-2.5 px-3 text-right">CGPA</th>
+                <th class="py-2.5 px-3 text-right">Attendance</th>
+                <th class="py-2.5 px-3 text-right">Internal Avg</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3">Primary Concern</th>
+                <th class="py-2.5 px-3 text-right rounded-r-lg">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="mentee-table-body" class="divide-y divide-slate-100 text-slate-700">
+              <tr>
+                <td colspan="8" class="py-8 text-center text-slate-400">Loading mentee records...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: ACADEMIC ANALYTICS -->
+    <!-- ========================================================================= -->
+    <div id="view-analytics" class="hidden space-y-6">
+      
+      <section class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
+          <div>
+            <h2 class="text-base font-bold text-primary">Cohort Academic Analytics & Subject Benchmarks</h2>
+            <p class="text-xs text-slate-500">Cross-subject comparative analysis across your assigned cohort (N=10 mentees).</p>
+          </div>
+          <span class="text-xs font-semibold px-2.5 py-1 bg-slate-100 rounded-lg text-slate-700">
+            Institutional Benchmark: 75%
+          </span>
+        </div>
+
+        <!-- Subject Performance Matrix Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1" id="subject-averages-grid">
+          <!-- Injected via JS -->
+          <div class="p-6 text-center text-slate-400 text-xs col-span-3">Loading subject benchmarks...</div>
+        </div>
+      </section>
+
+      <!-- Cohort Subject Bar Chart -->
+      <section class="glass-card rounded-2xl p-5 sm:p-6 space-y-3">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Subject Performance vs 75% Benchmark</h3>
+            <p class="text-xs text-slate-500">Mean internal continuous assessment score achieved by your mentees per course.</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-2 rounded bg-secondary"></span> Cohort Avg</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-red-500 border-dashed"></span> 75% Target</span>
+          </div>
+        </div>
+        <div class="relative w-full h-[240px] pt-2">
+          <canvas id="analyticsSubjectChart"></canvas>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: TASK MANAGEMENT -->
+    <!-- ========================================================================= -->
+    <div id="view-tasks" class="hidden space-y-6">
+      
+      <!-- Top Action Bar -->
+      <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-base font-bold text-primary">Academic Task Management & Intelligent Recommendations</h2>
+          <p class="text-xs text-slate-500">AI-generated task recommendations based on observed weak subjects, and live cohort monitoring.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="bulkApproveRecommendations()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">done_all</span>
+            <span>Bulk Approve Recommendations</span>
+          </button>
+          <button onclick="openAssignTaskModal()" class="px-3 py-1.5 bg-primary hover:bg-primary-container text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            <span>Assign Manual Task</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- INTELLIGENT SUBJECT-SPECIFIC TASK RECOMMENDATIONS -->
+      <section class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-500 text-[22px]">lightbulb</span>
+            <div>
+              <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Intelligent Task Recommendations</h3>
+              <p class="text-xs text-slate-500">Automatically generated when a mentee falls below benchmark or exhibits declining trajectory.</p>
+            </div>
+          </div>
+          <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200" id="recs-count-badge">
+            0 Recommendations
+          </span>
+        </div>
+
+        <div id="recommendations-container" class="space-y-3">
+          <div class="py-6 text-center text-slate-400 text-xs">Evaluating mentee academic evidence...</div>
+        </div>
+      </section>
+
+      <!-- MONITORED TASKS FEED -->
+      <section class="glass-card rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="text-sm font-bold text-primary uppercase tracking-wider">Cohort Task Monitoring</h3>
+            <p class="text-xs text-slate-500">Live progress tracking across assigned recovery and self-study tasks.</p>
+          </div>
+          
+          <!-- Filter Tabs -->
+          <div class="flex flex-wrap items-center gap-1.5 text-xs font-medium">
+            <button onclick="filterMentorTasks('all')" id="mtab-all" class="px-2.5 py-1 rounded-lg active-filter transition-colors">
+              All (<span id="mcount-all">0</span>)
+            </button>
+            <button onclick="filterMentorTasks('pending')" id="mtab-pending" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors">
+              Pending (<span id="mcount-pending">0</span>)
+            </button>
+            <button onclick="filterMentorTasks('in_progress')" id="mtab-in_progress" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors">
+              In Progress (<span id="mcount-in_progress">0</span>)
+            </button>
+            <button onclick="filterMentorTasks('completed')" id="mtab-completed" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors text-emerald-700">
+              Completed (<span id="mcount-completed">0</span>)
+            </button>
+            <button onclick="filterMentorTasks('overdue')" id="mtab-overdue" class="px-2.5 py-1 rounded-lg inactive-filter transition-colors text-red-700">
+              Overdue (<span id="mcount-overdue">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <div id="monitored-tasks-feed" class="space-y-2.5">
+          <div class="py-6 text-center text-slate-400 text-xs">Loading task records...</div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- SLIDE-OVER STUDENT DETAIL DRAWER (CLEAN EVIDENCE & TRAJECTORY) -->
+  <!-- ========================================================================= -->
+  <div id="student-drawer-backdrop" onclick="closeStudentDrawer()" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0"></div>
+  
+  <aside id="student-detail-drawer" class="fixed right-0 top-0 h-full w-full max-w-xl bg-white/95 backdrop-blur-md shadow-2xl z-50 flex flex-col justify-between translate-x-full transition-transform duration-300 ease-in-out border-l border-[#fae1d2]">
+    
+    <!-- Drawer Header -->
+    <div class="p-4 sm:p-5 border-b border-[#fae1d2] flex items-center justify-between bg-[#faeee5]">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-xs font-black shadow-sm flex-shrink-0" id="drawer-student-avatar">
+          AG
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-extrabold text-[#292320] truncate" id="drawer-student-fullname">Arjun Gupta</h3>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm" id="drawer-student-statusbadge">ON TRACK</span>
+          </div>
+          <p class="text-xs text-stone-500 truncate" id="drawer-student-reginfo">Reg #12511004 • Section K3P25IL</p>
+        </div>
+      </div>
+
+      <button onclick="closeStudentDrawer()" class="w-8 h-8 rounded-xl flex items-center justify-center text-stone-400 hover:bg-stone-200/60 transition-colors" title="Close">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Drawer Body (Scrollable & Compact) -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs text-stone-700">
+      
+      <!-- Risk Probability Gauge (Compact) -->
+      <div class="p-3.5 rounded-2xl glass-card space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-stone-600 uppercase tracking-wider text-[10px]">Risk Probability</span>
+          <span class="text-xs font-black text-rose-600" id="drawer-risk-pct">11% Risk</span>
+        </div>
+        <div class="w-full bg-stone-200/60 h-2 rounded-full overflow-hidden">
+          <div class="bg-gradient-to-r from-orange-500 to-rose-600 h-full rounded-full transition-all duration-500" id="drawer-risk-bar" style="width: 11%"></div>
+        </div>
+        <p class="text-[11px] text-stone-500 font-medium truncate" id="drawer-explanation-summary">
+          Consistent academic trajectory.
+        </p>
+      </div>
+
+      <!-- LONGITUDINAL ACADEMIC TRAJECTORY (THE GRAPH - PRESERVED & CLEAN) -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-[#292320] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-orange-600">show_chart</span>
+            <span>Weekly Trajectory (W1–W8)</span>
+          </h4>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold" id="drawer-trajectory-trendbadge">Stable (+0.53)</span>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-3">
+          <div class="relative w-full h-[160px]">
+            <canvas id="drawerTrajectoryChart"></canvas>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-[#fae1d2] text-[10px] text-stone-400">
+            <span>Solid: Observed • Dashed: Projected</span>
+            <span class="font-medium text-stone-600" id="drawer-ols-doc">OLS Regression</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHAP KEY DRIVERS (CLEAN COMPACT TABLE - NO PARAGRAPH CLUTTER) -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-[#292320] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-orange-600">analytics</span>
+            <span>Key Risk Drivers</span>
+          </h4>
+          <span class="text-[10px] text-stone-400">SHAP Attributions</span>
+        </div>
+
+        <div class="border border-[#eddcd2] rounded-2xl overflow-hidden bg-white/90 shadow-sm">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#faeee5] text-[10px] font-bold text-stone-600 uppercase tracking-wider border-b border-[#eddcd2]">
+                <th class="py-2 px-3">Feature</th>
+                <th class="py-2 px-2 text-center">Value</th>
+                <th class="py-2 px-2 text-center">Impact</th>
+                <th class="py-2 px-3 text-right">Contribution</th>
+              </tr>
+            </thead>
+            <tbody id="drawer-shap-table-body" class="divide-y divide-[#eddcd2] text-[11px]">
+              <!-- Populated via JS cleanly -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBJECT PERFORMANCE BREAKDOWN (COMPACT) -->
+      <div class="space-y-1.5">
+        <h4 class="font-bold text-[#292320] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-orange-600">auto_stories</span>
+          <span>Subject Benchmarks</span>
+        </h4>
+        <div id="drawer-subject-list" class="space-y-1.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- COHORT COMPARISON STANDING (COMPACT 3-TILE) -->
+      <div class="p-3 rounded-2xl glass-card space-y-1.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-stone-700 uppercase tracking-wider text-[10px]">Cohort Standing</h4>
+          <span class="text-[10px] text-stone-400 font-medium" id="drawer-sample-size">Cohort (N=10)</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="p-2 bg-white/90 rounded-xl border border-[#eddcd2]">
+            <div class="text-[9px] text-stone-500 font-bold uppercase">Marks vs Cohort</div>
+            <div class="text-xs font-black text-[#292320] mt-0.5" id="drawer-comp-marks">74% / 75%</div>
+          </div>
+          <div class="p-2 bg-white/90 rounded-xl border border-[#eddcd2]">
+            <div class="text-[9px] text-stone-500 font-bold uppercase">Attendance vs Goal</div>
+            <div class="text-xs font-black text-[#292320] mt-0.5" id="drawer-comp-att">86% / 85%</div>
+          </div>
+          <div class="p-2 bg-white/90 rounded-xl border border-[#eddcd2]">
+            <div class="text-[9px] text-stone-500 font-bold uppercase">Assignments</div>
+            <div class="text-xs font-black text-[#292320] mt-0.5" id="drawer-comp-asgn">82% / 80%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSTITUTIONAL RULES FIRED (COMPACT) -->
+      <div class="space-y-1.5">
+        <h4 class="font-bold text-[#292320] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-amber-600">rule</span>
+          <span>Triggered Rules</span>
+        </h4>
+        <div id="drawer-rules-list" class="space-y-1.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- RECOMMENDED COUNTERFACTUAL PATH (PUNCHY) -->
+      <div class="p-3 rounded-2xl bg-orange-50/70 border border-orange-200/60 flex items-start gap-2.5">
+        <span class="material-symbols-outlined text-[18px] text-orange-600 shrink-0 mt-0.5">lightbulb</span>
+        <div class="flex-1">
+          <span class="font-bold text-orange-950 text-[11px] block">Recommended Recovery</span>
+          <p class="text-[11px] text-orange-900 mt-0.5" id="drawer-counterfactual-text">
+            Target improvements across weak subjects to maintain Good Standing.
+          </p>
+        </div>
+      </div>
+
+      <!-- RECORDED MENTORING MEETINGS -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-[#292320] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-orange-600">record_voice_over</span>
+            <span>Recorded Sessions</span>
+          </h4>
+          <span class="text-[10px] text-stone-400 font-bold" id="drawer-student-meetings-count">0 sessions</span>
+        </div>
+        <div id="drawer-student-meetings-list" class="space-y-1.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- ACTIVE ASSIGNED TASKS -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <h4 class="font-bold text-[#292320] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-orange-600">task</span>
+            <span>Assigned Tasks</span>
+          </h4>
+          <span class="text-[10px] text-stone-400 font-bold" id="drawer-student-tasks-count">0 tasks</span>
+        </div>
+        <div id="drawer-student-tasks-list" class="space-y-1.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="p-4 border-t border-[#fae1d2] bg-[#faeee5] flex items-center justify-between gap-2">
+      <button onclick="closeStudentDrawer()" class="px-3.5 py-2 rounded-xl border border-[#eddcd2] text-xs font-bold text-stone-600 hover:bg-white transition-colors">
+        Close
+      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="openLogMeetingModal(activeDrawerStudentId)" class="px-3 py-2 rounded-xl border border-[#eddcd2] bg-white text-stone-700 hover:bg-stone-50 text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-orange-600">record_voice_over</span>
+          <span>Log Meeting</span>
+        </button>
+        <button onclick="assignTaskFromDrawer()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">add_task</span>
+          <span>Assign Task</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- ASSIGN ACADEMIC TASK MODAL -->
+  <!-- ========================================================================= -->
+  <div id="assign-task-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">assignment_add</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-primary" id="modal-task-heading">Assign Academic Task</h3>
+            <p class="text-xs text-slate-500">Provide targeted practice or recovery instructions to your mentee.</p>
+          </div>
+        </div>
+        <button onclick="closeAssignTaskModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <form id="assign-task-form" onsubmit="submitMentorTask(event)" class="space-y-3.5">
+        <input type="hidden" id="modal-rec-id" value="">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Select Mentee <span class="text-red-500">*</span></label>
+          <select id="modal-student-select" required class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+            <!-- Dynamically populated with authorized mentees -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Subject Code</label>
+            <select id="modal-course-code" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+              <option value="MTH401">MTH401 — Discrete Mathematics</option>
+              <option value="CSE202">CSE202 — Object Oriented Programming</option>
+              <option value="CSE205">CSE205 — Data Structures & Algorithms</option>
+              <option value="CSE310">CSE310 — Database Management Systems</option>
+              <option value="CSE320">CSE320 — Computer Networks</option>
+              <option value="INT404">INT404 — Artificial Intelligence</option>
+              <option value="GEN">General Academic Recovery</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Priority</label>
+            <select id="modal-task-priority" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+              <option value="High" selected>High (Urgent)</option>
+              <option value="Medium">Medium (Standard)</option>
+              <option value="Low">Low (Supplemental)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Task Title <span class="text-red-500">*</span></label>
+          <input type="text" id="modal-task-title" required placeholder="e.g. Complete Discrete Math Unit 3 Recurrence Problem Set" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Detailed Instructions / Description</label>
+          <textarea id="modal-task-desc" rows="3" placeholder="Provide specific guidance, problem numbers, or office hour preparation instructions..." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Due Date</label>
+          <input type="date" id="modal-task-due" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeAssignTaskModal()" class="px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <button type="submit" id="submit-assign-btn" class="px-4 py-2 rounded-lg bg-primary hover:bg-primary-container text-white text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span>Assign to Mentee</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- LOG MENTORING SESSION MODAL -->
+  <!-- ========================================================================= -->
+  <div id="log-meeting-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">record_voice_over</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-primary">Log Mentoring Meeting</h3>
+            <p class="text-xs text-slate-500">Record 1-on-1 discussion, academic concerns, and agreed recovery actions.</p>
+          </div>
+        </div>
+        <button onclick="closeLogMeetingModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <form id="log-meeting-form" onsubmit="submitMentorMeeting(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Select Mentee <span class="text-red-500">*</span></label>
+          <select id="meeting-student-select" required class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Date &amp; Time <span class="text-red-500">*</span></label>
+            <input type="datetime-local" id="meeting-date" required class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Modality</label>
+            <select id="meeting-type" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+              <option value="In Person" selected>In Person</option>
+              <option value="Online">Online (Teams/Meet)</option>
+              <option value="Phone">Phone</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Duration (Min)</label>
+            <input type="number" id="meeting-duration" value="30" min="5" max="240" required class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Discussion Summary <span class="text-red-500">*</span></label>
+          <textarea id="meeting-summary" required rows="3" placeholder="Overview of topics discussed, academic standing review, root causes of struggle..." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Academic Concerns</label>
+            <textarea id="meeting-concerns" rows="2" placeholder="Specific course deficits, attendance, lab performance..." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Agreed Actions</label>
+            <textarea id="meeting-actions" rows="2" placeholder="Practice problem sets, office hours attendance, study schedules..." class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary"></textarea>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Next Follow-up Date (Optional)</label>
+          <input type="date" id="meeting-followup-date" class="w-full text-xs p-2.5 rounded-lg border border-slate-200 focus:outline-none focus:border-primary">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeLogMeetingModal()" class="px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+            Cancel
+          </button>
+          <button type="submit" id="submit-meeting-btn" class="px-4 py-2 rounded-lg bg-secondary hover:bg-sky-700 text-white text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Save Meeting Record</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const isFile = window.location.protocol === 'file:';
+    const API_BASE = isFile ? 'http://127.0.0.1:8000' : '';
+    let token = localStorage.getItem('token') || '';
+    let currentUser = null;
+    let mentorData = null;
+    let cachedMentees = [];
+    let cachedTasks = [];
+    let cachedRecommendations = [];
+    let currentRosterFilter = 'ALL';
+    let currentTaskFilter = 'all';
+    let currentActiveView = 'overview';
+    let activeDrawerStudentId = null;
+
+    // Chart.js Instances
+    let overviewDonutChart = null;
+    let overviewBarChart = null;
+    let analyticsBarChart = null;
+    let drawerLineChart = null;
+
+    // 1. Navigation & View Switching
+    function switchView(viewName) {
+      currentActiveView = viewName;
+      const views = ['overview', 'students', 'analytics', 'tasks'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) {
+          if (v === viewName) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+
+        // Top navigation pills
+        const tbtn = document.getElementById(`tnav-${v}`);
+        if (tbtn) {
+          if (v === viewName) {
+            tbtn.className = 'px-3 py-1.5 rounded-lg active-nav-tab transition-all';
+          } else {
+            tbtn.className = 'px-3 py-1.5 rounded-lg inactive-nav-tab transition-all';
+          }
+        }
+
+        // Sidebar drawer pills
+        const sbtn = document.getElementById(`snav-${v}`);
+        if (sbtn) {
+          if (v === viewName) {
+            sbtn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium bg-primary text-white text-left transition-colors';
+          } else {
+            sbtn.className = 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 text-left transition-colors';
+          }
+        }
+      });
+
+      // Lazy load view-specific analytics if needed
+      if (viewName === 'analytics') {
+        loadAnalyticsData();
+      } else if (viewName === 'tasks') {
+        loadRecommendations();
+        loadMentorTasks();
+      }
+    }
+
+    function toggleSidebar() {
+      const drawer = document.getElementById('sidebarDrawer');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!drawer || !backdrop) return;
+      const isOpen = !drawer.classList.contains('-translate-x-full');
+      if (isOpen) {
+        drawer.classList.add('-translate-x-full');
+        backdrop.classList.add('opacity-0');
+        setTimeout(() => backdrop.classList.add('hidden'), 300);
+      } else {
+        backdrop.classList.remove('hidden');
+        setTimeout(() => {
+          backdrop.classList.remove('opacity-0');
+          drawer.classList.remove('-translate-x-full');
+        }, 10);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = isFile ? 'login.html' : '/login';
+    }
+
+    // 2. Auth Session Management
+    async function ensureMentorSession() {
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            currentUser = await res.json();
+            if (currentUser.role === 'mentor' || currentUser.role === 'admin') return;
+          }
+        } catch (e) {
+          console.warn('Session verification fallback', e);
+        }
+      }
+
+      // Default login as Mentor Dr. Manoj Saini (m08)
+      try {
+        const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'm08', password: 'mentor123' })
+        });
+        if (loginRes.ok) {
+          const data = await loginRes.json();
+          token = data.access_token;
+          currentUser = data.user;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(currentUser));
+        }
+      } catch (err) {
+        console.error('Mentor login error:', err);
+      }
+    }
+
+    // 3. Load Mentor Dashboard & Overview
+    async function loadMentorDashboard() {
+      await ensureMentorSession();
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/dashboard`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Dashboard fetch failed');
+        mentorData = await res.json();
+        renderMentorDashboard(mentorData);
+
+        // Load Analytics Overview Charts
+        loadAnalyticsData();
+
+        // Load Recommendations & Tasks
+        loadRecommendations();
+        loadMentorTasks();
+      } catch (err) {
+        console.error('Mentor load error:', err);
+      }
+    }
+
+    function renderMentorDashboard(data) {
+      if (!data) return;
+
+      const mentorName = data.mentor_name || 'Dr. Manoj Saini';
+      const facultyCode = data.faculty_code || 'F08';
+      const initials = mentorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'MS';
+
+      // Header Updates
+      document.getElementById('mentor-greeting').textContent = `Mentor Overview: ${mentorName}`;
+      document.getElementById('header-mentor-name').textContent = `${mentorName} (${facultyCode})`;
+      document.getElementById('drawer-mentor-name').textContent = mentorName;
+      document.getElementById('drawer-faculty-code').textContent = `Code: ${facultyCode} • Dept CSE`;
+      document.getElementById('drawer-initials').textContent = initials;
+      document.getElementById('header-avatar').textContent = initials;
+
+      cachedMentees = data.mentees || [];
+      const total = cachedMentees.length;
+
+      // Populate Mentee Select Dropdowns in Modals
+      const selectEl = document.getElementById('modal-student-select');
+      const meetingSelectEl = document.getElementById('meeting-student-select');
+      const menteeOptions = cachedMentees.map(m => `
+        <option value="${m.student_id}">${m.name} (${m.registration_number}) — ${m.academic_status}</option>
+      `).join('');
+      if (selectEl) selectEl.innerHTML = menteeOptions;
+      if (meetingSelectEl) meetingSelectEl.innerHTML = menteeOptions;
+
+      // KPIs
+      document.getElementById('kpi-total-mentees').textContent = data.kpi?.total_mentees || total;
+      document.getElementById('kpi-ontrack-count').textContent = data.kpi?.on_track_count || 0;
+      document.getElementById('kpi-ontrack-pct').textContent = (data.kpi?.on_track_pct || 0).toFixed(0) + '%';
+      document.getElementById('kpi-watch-count').textContent = data.kpi?.watch_count || 0;
+      document.getElementById('kpi-watch-pct').textContent = (data.kpi?.watch_pct || 0).toFixed(0) + '%';
+      document.getElementById('kpi-review-count').textContent = data.kpi?.review_count || 0;
+      document.getElementById('kpi-review-pct').textContent = (data.kpi?.review_pct || 0).toFixed(0) + '%';
+
+      // Filter Pill Counts
+      document.getElementById('count-pill-all').textContent = total;
+      document.getElementById('count-pill-review').textContent = data.kpi?.review_count || 0;
+      document.getElementById('count-pill-watch').textContent = data.kpi?.watch_count || 0;
+      document.getElementById('count-pill-ontrack').textContent = data.kpi?.on_track_count || 0;
+      document.getElementById('roster-total-pill').textContent = `${total} Students`;
+      document.getElementById('drawer-student-count').textContent = total;
+
+      // Render Priority Queue
+      renderPriorityQueue(data.priority_queue || []);
+
+      // Render Roster Table
+      filterAndRenderRoster();
+    }
+
+    function renderPriorityQueue(queue) {
+      const container = document.getElementById('priority-queue-list');
+      const badge = document.getElementById('pq-badge-count');
+      if (!container) return;
+
+      badge.textContent = `${queue.length} pending items`;
+
+      if (!queue || queue.length === 0) {
+        container.innerHTML = `
+          <div class="py-6 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-500">
+            No mentees currently require urgent escalation. All students are progressing within expected parameters.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = queue.map(item => {
+        const isUrgent = item.urgency === 'High Urgency' || item.urgency === 'High';
+        const initials = item.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        return `
+          <div class="p-3.5 rounded-xl border ${isUrgent ? 'bg-red-50/40 border-red-200' : 'bg-amber-50/40 border-amber-200'} flex flex-col md:flex-row md:items-center justify-between gap-3 transition-all hover:shadow-sm">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full ${isUrgent ? 'bg-red-600' : 'bg-amber-600'} text-white flex items-center justify-center font-bold text-xs shrink-0">
+                ${initials}
+              </div>
+              <div class="space-y-0.5">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-bold text-slate-800 text-xs">${item.name}</span>
+                  <span class="text-[11px] text-slate-500 font-mono">Reg #${item.registration_number}</span>
+                  <span class="px-2 py-0.2 rounded-full text-[10px] font-bold ${isUrgent ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}">${item.status_label || 'Attention'}</span>
+                  <span class="px-2 py-0.2 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">${item.urgency}</span>
+                </div>
+                <p class="text-[11px] text-slate-600 mt-0.5">
+                  <strong class="text-slate-800">Concern:</strong> ${item.concern_summary || 'Academic indicators require mentor review.'}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end md:self-auto shrink-0">
+              <button onclick="openStudentDrawer(${item.student_id})" class="px-3 py-1.5 bg-primary text-white hover:bg-primary-container rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-sm">
+                <span class="material-symbols-outlined text-[15px]">psychology</span>
+                <span>Inspect Evidence</span>
+              </button>
+              <button onclick="openAssignTaskModal(${item.student_id})" class="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1">
+                <span class="material-symbols-outlined text-[15px]">add_task</span>
+                <span>Assign Task</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 4. Analytics Data & Charts (Phase 2)
+    async function loadAnalyticsData() {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/analytics`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const analytics = await res.json();
+
+        // Update Overview KPIs
+        document.getElementById('kpi-avg-attendance').textContent = analytics.avg_cohort_attendance.toFixed(1) + '%';
+        document.getElementById('kpi-active-tasks').textContent = analytics.pending_tasks_count;
+
+        // Render Donut Chart
+        renderOverviewDonut(analytics.status_distribution);
+
+        // Render Trajectory Bar Chart
+        renderOverviewTrajectoryBar(analytics.trajectory_distribution);
+
+        // Render Subject Grid & Subject Bar Chart in Analytics View
+        renderSubjectAnalytics(analytics.subject_averages);
+      } catch (err) {
+        console.error('Analytics load error:', err);
+      }
+    }
+
+    function renderOverviewDonut(statusDist) {
+      const canvas = document.getElementById('overviewRiskDonut');
+      if (!canvas) return;
+      if (overviewDonutChart) overviewDonutChart.destroy();
+
+      const onTrack = statusDist?.on_track || 8;
+      const watch = statusDist?.watch || 0;
+      const review = statusDist?.needs_review || 2;
+
+      document.getElementById('donut-ontrack-val').textContent = onTrack;
+      document.getElementById('donut-watch-val').textContent = watch;
+      document.getElementById('donut-review-val').textContent = review;
+
+      overviewDonutChart = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['On Track', 'Watch', 'Needs Review'],
+          datasets: [{
+            data: [onTrack, watch, review],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.label}: ${ctx.raw} students`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderOverviewTrajectoryBar(trajDist) {
+      const canvas = document.getElementById('overviewTrajectoryBar');
+      if (!canvas) return;
+      if (overviewBarChart) overviewBarChart.destroy();
+
+      const improving = trajDist?.improving || 1;
+      const stable = trajDist?.stable || 8;
+      const declining = trajDist?.declining || 1;
+
+      overviewBarChart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Improving (Slope > +0.8)', 'Stable ([-0.8, +0.8])', 'Declining (Slope < -0.8)'],
+          datasets: [{
+            label: 'Students Count',
+            data: [improving, stable, declining],
+            backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+            borderRadius: 6,
+            maxBarThickness: 45
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 2, font: { family: 'Inter', size: 10 } },
+              grid: { color: '#f1f5f9' }
+            },
+            x: {
+              ticks: { font: { family: 'Inter', size: 10, weight: 500 } },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSubjectAnalytics(subjects) {
+      if (!subjects) return;
+
+      // 1. Grid Cards
+      const grid = document.getElementById('subject-averages-grid');
+      if (grid) {
+        grid.innerHTML = subjects.map(s => {
+          const isBelow = s.cohort_avg < s.benchmark;
+          return `
+            <div class="p-3.5 rounded-xl border ${isBelow ? 'bg-amber-50/40 border-amber-200' : 'bg-slate-50 border-slate-200'} space-y-2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-slate-800 text-xs">${s.subject_code}</span>
+                  <div class="text-[11px] text-slate-500 truncate max-w-[180px]">${s.subject_name}</div>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isBelow ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                  ${isBelow ? 'Attention' : 'Optimal'}
+                </span>
+              </div>
+
+              <div class="flex items-baseline justify-between pt-1">
+                <div>
+                  <span class="text-xl font-extrabold ${isBelow ? 'text-amber-800' : 'text-primary'}">${s.cohort_avg.toFixed(1)}%</span>
+                  <span class="text-[10px] text-slate-400">/ 75% Goal</span>
+                </div>
+                <div class="text-[11px] text-slate-500 font-medium">
+                  <span class="${s.students_below_count > 0 ? 'text-red-600 font-bold' : 'text-slate-500'}">${s.students_below_count}</span> below target
+                </div>
+              </div>
+
+              <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                <div class="${isBelow ? 'bg-amber-500' : 'bg-primary'} h-full rounded-full" style="width: ${Math.min(100, s.cohort_avg)}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Comparative Bar Chart
+      const canvas = document.getElementById('analyticsSubjectChart');
+      if (canvas) {
+        if (analyticsBarChart) analyticsBarChart.destroy();
+        analyticsBarChart = new Chart(canvas.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: subjects.map(s => s.subject_code),
+            datasets: [
+              {
+                label: 'Cohort Average (%)',
+                data: subjects.map(s => s.cohort_avg),
+                backgroundColor: subjects.map(s => s.cohort_avg < 75.0 ? '#f59e0b' : '#296199'),
+                borderRadius: 4,
+                maxBarThickness: 32
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ` Cohort Average: ${ctx.raw}% (Cutoff: 75.0%)`
+                }
+              }
+            },
+            scales: {
+              y: {
+                min: 30,
+                max: 100,
+                ticks: { stepSize: 10, callback: v => v + '%' },
+                grid: { color: '#f1f5f9' }
+              },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
+
+    // 5. Mentee Roster Table
+    function filterMenteeStatus(status) {
+      currentRosterFilter = status;
+      ['ALL', 'NEEDS REVIEW', 'WATCH', 'ON TRACK'].forEach(s => {
+        const pill = document.getElementById(`filter-pill-${s}`);
+        if (!pill) return;
+        if (s === status) {
+          pill.className = 'px-2.5 py-1 rounded-lg active-filter transition-colors';
+        } else {
+          pill.className = 'px-2.5 py-1 rounded-lg inactive-filter transition-colors';
+        }
+      });
+      filterAndRenderRoster();
+    }
+
+    function filterAndRenderRoster() {
+      const search = (document.getElementById('rosterSearch')?.value || '').toLowerCase().trim();
+      const tbody = document.getElementById('mentee-table-body');
+      if (!tbody) return;
+
+      let list = cachedMentees;
+      if (currentRosterFilter !== 'ALL') {
+        list = list.filter(m => m.academic_status === currentRosterFilter);
+      }
+      if (search) {
+        list = list.filter(m => 
+          m.name.toLowerCase().includes(search) || 
+          m.registration_number.toLowerCase().includes(search)
+        );
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-8 text-center text-slate-400">No mentees match your search or filter.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map(m => {
+        const isReview = (m.academic_status === 'NEEDS REVIEW');
+        const isWatch = (m.academic_status === 'WATCH');
+
+        let statusBadge = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+        if (isReview) statusBadge = 'bg-red-50 text-red-800 border-red-200';
+        if (isWatch) statusBadge = 'bg-amber-50 text-amber-800 border-amber-200';
+
+        const initials = m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-3 px-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                  ${initials}
+                </div>
+                <div>
+                  <div class="font-bold text-slate-800 text-xs">${m.name}</div>
+                  <div class="text-[10px] text-slate-400">Section ${m.section}</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-3 font-mono font-medium text-slate-600">${m.registration_number}</td>
+            <td class="py-3 px-3 text-right font-bold text-slate-800">${m.cgpa.toFixed(2)}</td>
+            <td class="py-3 px-3 text-right">
+              <span class="font-semibold ${m.attendance_pct < 75 ? 'text-red-600' : 'text-slate-700'}">${m.attendance_pct.toFixed(1)}%</span>
+            </td>
+            <td class="py-3 px-3 text-right font-semibold text-slate-700">${m.internal_score_pct.toFixed(1)}%</td>
+            <td class="py-3 px-3">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${statusBadge}">
+                ${m.academic_status}
+              </span>
+            </td>
+            <td class="py-3 px-3 text-slate-500 max-w-xs truncate" title="${m.primary_concern || 'None'}">
+              ${m.primary_concern || 'On track with regular milestones'}
+            </td>
+            <td class="py-3 px-3 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                <button onclick="openStudentDrawer(${m.student_id})" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-md text-[11px] transition-colors flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">visibility</span>
+                  <span>View Details</span>
+                </button>
+                <button onclick="openAssignTaskModal(${m.student_id})" class="px-2.5 py-1 bg-primary hover:bg-primary-container text-white font-semibold rounded-md text-[11px] transition-colors flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">add_task</span>
+                  <span>Assign</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('rosterSearch')?.addEventListener('input', () => {
+      filterAndRenderRoster();
+    });
+
+    // 6. Slide-Over Student Detail Drawer (FIXED SHAP BUG & TRAJECTORY)
+    async function openStudentDrawer(studentId) {
+      activeDrawerStudentId = studentId;
+      const backdrop = document.getElementById('student-drawer-backdrop');
+      const drawer = document.getElementById('student-detail-drawer');
+      if (!drawer || !backdrop) return;
+
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        backdrop.classList.remove('opacity-0');
+        drawer.classList.remove('translate-x-full');
+      }, 10);
+
+      // 1. Fetch Risk Details with Fixed SHAP
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/mentees/${studentId}/risk`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const detail = await res.json();
+          renderDrawerRiskDetails(detail);
+        }
+      } catch (err) {
+        console.error('Drawer risk fetch failed:', err);
+      }
+
+      // 2. Fetch Longitudinal Trajectory & Cohort Comparison
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/mentees/${studentId}/trajectory`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const traj = await res.json();
+          renderDrawerTrajectory(traj);
+        }
+      } catch (err) {
+        console.error('Drawer trajectory fetch failed:', err);
+      }
+
+      // 3. Load active tasks and recorded meetings for this mentee
+      loadDrawerStudentTasks(studentId);
+      loadDrawerStudentMeetings(studentId);
+    }
+
+    function closeStudentDrawer() {
+      const backdrop = document.getElementById('student-drawer-backdrop');
+      const drawer = document.getElementById('student-detail-drawer');
+      if (!drawer || !backdrop) return;
+
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('opacity-0');
+      setTimeout(() => backdrop.classList.add('hidden'), 300);
+      activeDrawerStudentId = null;
+    }
+
+    function renderDrawerRiskDetails(detail) {
+      document.getElementById('drawer-student-fullname').textContent = detail.name;
+      document.getElementById('drawer-student-reginfo').textContent = `Reg #${detail.registration_number} • Section ${detail.section}`;
+      document.getElementById('drawer-student-avatar').textContent = detail.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      document.getElementById('drawer-student-metrics').textContent = `CGPA: ${detail.cgpa.toFixed(2)} • Risk Probability: ${(detail.risk_probability * 100).toFixed(1)}%`;
+
+      const statusBadge = document.getElementById('drawer-student-statusbadge');
+      if (detail.academic_status === 'NEEDS REVIEW') {
+        statusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200';
+      } else if (detail.academic_status === 'WATCH') {
+        statusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200';
+      } else {
+        statusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200';
+      }
+      statusBadge.textContent = detail.academic_status;
+
+      // Risk Gauge
+      const probPct = Math.min(100, Math.round(detail.risk_probability * 100));
+      document.getElementById('drawer-risk-pct').textContent = `${probPct}% Risk`;
+      document.getElementById('drawer-risk-bar').style.width = `${probPct}%`;
+      const fullSummary = detail.explanation_summary || 'Consistent academic trajectory.';
+      document.getElementById('drawer-explanation-summary').textContent = fullSummary.split('.')[0] + '.';
+
+      // SHAP Waterfall Structured Table (Clean & Compact)
+      const shapTbody = document.getElementById('drawer-shap-table-body');
+      if (detail.shap_waterfall && detail.shap_waterfall.length > 0) {
+        shapTbody.innerHTML = detail.shap_waterfall.map(item => {
+          const isRiskIncreaser = item.direction === 'positive_risk' || item.contribution > 0;
+          const featName = item.feature_name || item.feature || 'Academic Signal';
+          const obsVal = item.observed_value || item.current_value || 'Recorded';
+          const contribSign = item.contribution >= 0 ? `+${item.contribution.toFixed(2)}` : item.contribution.toFixed(2);
+
+          return `
+            <tr class="hover:bg-[#faeee5]/50 transition-colors">
+              <td class="py-2 px-3">
+                <span class="font-bold text-[#292320]">${featName}</span>
+              </td>
+              <td class="py-2 px-2 text-center font-mono font-bold text-stone-700 text-[11px]">${obsVal}</td>
+              <td class="py-2 px-2 text-center">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${isRiskIncreaser ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+                  <span class="material-symbols-outlined text-[12px]">${isRiskIncreaser ? 'arrow_upward' : 'arrow_downward'}</span>
+                  <span>${isRiskIncreaser ? 'Risk' : 'Safe'}</span>
+                </span>
+              </td>
+              <td class="py-2 px-3 text-right font-mono font-black ${isRiskIncreaser ? 'text-rose-600' : 'text-emerald-700'}">
+                ${contribSign}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        shapTbody.innerHTML = `<tr><td colspan="4" class="py-3 text-center text-stone-400 italic">No significant risk attributions.</td></tr>`;
+      }
+
+      // Rules Fired (Compact Chips)
+      const rulesContainer = document.getElementById('drawer-rules-list');
+      if (detail.rules_fired && detail.rules_fired.length > 0) {
+        rulesContainer.innerHTML = detail.rules_fired.map(rule => `
+          <div class="p-2.5 rounded-xl border border-amber-200/70 bg-amber-50/70 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="material-symbols-outlined text-[16px] text-amber-700 flex-shrink-0">warning</span>
+              <span class="font-bold text-stone-800 truncate">${rule.rule_name || rule.rule_id}</span>
+              <span class="text-[10px] text-stone-500 hidden sm:inline truncate">(${rule.details})</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-200 text-amber-900 flex-shrink-0">${rule.severity}</span>
+          </div>
+        `).join('');
+      } else {
+        rulesContainer.innerHTML = `<div class="text-stone-400 italic text-[11px]">No critical rules triggered.</div>`;
+      }
+
+      // Counterfactual
+      const cfEl = document.getElementById('drawer-counterfactual-text');
+      if (detail.counterfactual) {
+        cfEl.textContent = typeof detail.counterfactual === 'string' 
+          ? detail.counterfactual 
+          : (detail.counterfactual.scenario || 'Target improvements across weak subjects to maintain Good Standing.');
+      }
+    }
+
+    function renderDrawerTrajectory(traj) {
+      if (!traj) return;
+
+      // Trajectory Trend Badge
+      const trendBadge = document.getElementById('drawer-trajectory-trendbadge');
+      if (traj.trend_classification === 'Improving') {
+        trendBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800';
+      } else if (traj.trend_classification === 'Declining') {
+        trendBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800';
+      } else {
+        trendBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800';
+      }
+      trendBadge.textContent = `${traj.trend_classification} (${traj.trend_slope >= 0 ? '+' : ''}${traj.trend_slope.toFixed(2)})`;
+      document.getElementById('drawer-ols-doc').textContent = traj.method_documentation;
+
+      // Trajectory Chart (Weekly W1-W8)
+      const canvas = document.getElementById('drawerTrajectoryChart');
+      if (canvas && traj.weekly_trajectory) {
+        if (drawerLineChart) drawerLineChart.destroy();
+        const pts = traj.weekly_trajectory;
+        const labels = pts.map(p => `W${p.week_number}`);
+        const splitIdx = pts.findIndex(p => p.is_projected);
+
+        drawerLineChart = new Chart(canvas.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Assessment Score (%)',
+                data: pts.map(p => p.assessment_score),
+                borderColor: '#296199',
+                borderWidth: 2,
+                pointRadius: 3,
+                tension: 0.3,
+                segment: {
+                  borderDash: ctx => ctx.p0DataIndex >= (splitIdx - 1) ? [5, 5] : undefined
+                }
+              },
+              {
+                label: 'Attendance (%)',
+                data: pts.map(p => p.attendance_pct),
+                borderColor: '#059669',
+                borderWidth: 1.5,
+                pointRadius: 3,
+                tension: 0.3,
+                segment: {
+                  borderDash: ctx => ctx.p0DataIndex >= (splitIdx - 1) ? [5, 5] : undefined
+                }
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}% ${pts[ctx.dataIndex].is_projected ? '(Projected)' : '(Observed)'}`
+                }
+              }
+            },
+            scales: {
+              y: { min: 40, max: 100, ticks: { stepSize: 15, font: { size: 9 } } },
+              x: { ticks: { font: { size: 9 } }, grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      // Subject Performance Breakdown
+      const subList = document.getElementById('drawer-subject-list');
+      if (subList && traj.subject_trajectories) {
+        subList.innerHTML = traj.subject_trajectories.map(s => `
+          <div class="p-2.5 rounded-lg border ${s.concern_flag ? 'bg-amber-50/40 border-amber-200' : 'bg-slate-50 border-slate-200'} flex items-center justify-between">
+            <div>
+              <span class="font-bold text-slate-800">${s.subject_code}</span>
+              <span class="text-slate-500 ml-1">(${s.subject_name})</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold ${s.student_marks_pct < 75 ? 'text-red-600' : 'text-slate-700'}">Marks: ${s.student_marks_pct}%</span>
+              <span class="text-slate-300">•</span>
+              <span class="text-slate-500">Cohort: ${s.cohort_avg}%</span>
+              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${s.concern_flag ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                ${s.trend}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Cohort Comparison
+      if (traj.comparison) {
+        const c = traj.comparison;
+        document.getElementById('drawer-sample-size').textContent = c.sample_size_label;
+        document.getElementById('drawer-comp-marks').textContent = `${c.student_assessment_avg.toFixed(1)}% / ${c.cohort_assessment_avg.toFixed(1)}%`;
+        document.getElementById('drawer-comp-att').textContent = `${c.student_attendance_pct.toFixed(1)}% / ${c.institutional_attendance_goal.toFixed(0)}%`;
+        document.getElementById('drawer-comp-asgn').textContent = `${c.student_assignment_pct.toFixed(0)}% / ${c.cohort_assignment_avg.toFixed(1)}%`;
+      }
+    }
+
+    async function loadDrawerStudentTasks(studentId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/tasks?student_id=${studentId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const tasks = await res.json();
+        const container = document.getElementById('drawer-student-tasks-list');
+        const countEl = document.getElementById('drawer-student-tasks-count');
+        countEl.textContent = `${tasks.length} tasks`;
+
+        if (tasks.length === 0) {
+          container.innerHTML = `<div class="p-3 text-center bg-slate-50 rounded-lg text-slate-400">No tasks currently assigned to this student.</div>`;
+          return;
+        }
+
+        container.innerHTML = tasks.map(t => `
+          <div class="p-3 rounded-xl border border-slate-200 bg-white space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 text-xs">${t.title}</span>
+              <span class="px-2 py-0.2 rounded text-[10px] font-semibold ${t.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}">${t.status}</span>
+            </div>
+            ${t.description ? `<p class="text-[11px] text-slate-600 leading-relaxed">${t.description}</p>` : ''}
+            <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1">
+              <span>Course: ${t.course_code || 'ACADEMIC'} • Priority: ${t.priority}</span>
+              <span>Due: ${t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No date'}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.warn('Student tasks load error', e);
+      }
+    }
+
+    function assignTaskFromDrawer() {
+      if (activeDrawerStudentId) {
+        openAssignTaskModal(activeDrawerStudentId);
+      } else {
+        openAssignTaskModal();
+      }
+    }
+
+    // 7. Intelligent Recommendations Engine (Phase 3)
+    async function loadRecommendations() {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/recommendations`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch recommendations');
+        cachedRecommendations = await res.json();
+        renderRecommendations(cachedRecommendations);
+      } catch (err) {
+        console.error('Recommendations load error:', err);
+      }
+    }
+
+    function renderRecommendations(recs) {
+      const container = document.getElementById('recommendations-container');
+      const badge = document.getElementById('recs-count-badge');
+      const dot = document.getElementById('tnav-task-dot');
+      if (!container) return;
+
+      badge.textContent = `${recs.length} Recommendations`;
+      if (dot) dot.style.display = recs.length > 0 ? 'inline-block' : 'none';
+
+      if (!recs || recs.length === 0) {
+        container.innerHTML = `
+          <div class="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <span class="material-symbols-outlined text-[32px] text-slate-300">verified</span>
+            <div class="text-xs font-semibold text-slate-700 mt-1">No Academic Deficits Requiring Action</div>
+            <div class="text-[11px] text-slate-400">All student subject performances and attendance records currently meet degree thresholds.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = recs.map(r => `
+        <div class="p-4 rounded-xl border border-amber-200 bg-amber-50/20 hover:border-amber-300 transition-all space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 uppercase">${r.course_code}</span>
+                <span class="text-xs font-bold text-slate-800">${r.student_name} (${r.registration_number})</span>
+                <span class="px-2 py-0.2 rounded text-[10px] font-semibold ${r.priority === 'High' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-blue-50 text-blue-700 border border-blue-200'}">
+                  ${r.priority} Priority
+                </span>
+              </div>
+              <p class="text-xs font-semibold text-amber-900">${r.trigger_reason}</p>
+            </div>
+
+            <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+              <button onclick="openApproveModal('${r.id}')" class="px-3 py-1.5 bg-primary hover:bg-primary-container text-white rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center gap-1">
+                <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                <span>Approve & Assign</span>
+              </button>
+              <button onclick="dismissRecommendation('${r.id}')" class="px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs font-semibold transition-colors" title="Dismiss with rationale">
+                Dismiss
+              </button>
+            </div>
+          </div>
+
+          <!-- Suggested Task Block -->
+          <div class="p-3 bg-white rounded-lg border border-slate-200 space-y-1.5">
+            <div class="text-xs font-bold text-primary flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[15px] text-amber-600">assignment</span>
+              <span>${r.recommended_title}</span>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-relaxed">${r.recommended_description}</p>
+            <div class="flex flex-wrap items-center gap-3 pt-1 text-[10px] text-slate-500 font-medium">
+              <span>Frequency: <strong>${r.suggested_frequency}</strong></span>
+              <span>•</span>
+              <span>Duration: <strong>${r.suggested_duration}</strong></span>
+              <span>•</span>
+              <span>Suggested Deadline: <strong>${r.suggested_deadline}</strong></span>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-slate-500 italic">
+            * <strong>Pedagogical Context:</strong> ${r.explanation}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openApproveModal(recId) {
+      const rec = cachedRecommendations.find(r => r.id === recId);
+      if (!rec) return;
+
+      document.getElementById('modal-rec-id').value = rec.id;
+      document.getElementById('modal-task-heading').textContent = `Approve Task: ${rec.course_code}`;
+      document.getElementById('modal-student-select').value = rec.student_id;
+      document.getElementById('modal-course-code').value = rec.course_code;
+      document.getElementById('modal-task-priority').value = rec.priority;
+      document.getElementById('modal-task-title').value = rec.recommended_title;
+      document.getElementById('modal-task-desc').value = rec.recommended_description;
+      document.getElementById('modal-task-due').value = rec.suggested_deadline;
+
+      document.getElementById('assign-task-modal').classList.remove('hidden');
+    }
+
+    async function dismissRecommendation(recId) {
+      const reason = prompt('Please provide a pedagogical rationale for dismissing this recommendation:');
+      if (!reason) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/recommendations/${recId}/dismiss`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ justification: reason })
+        });
+        if (!res.ok) throw new Error('Dismissal failed');
+        alert('Recommendation officially dismissed and logged in audit trails.');
+        loadRecommendations();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function bulkApproveRecommendations() {
+      if (!cachedRecommendations || cachedRecommendations.length === 0) {
+        alert('No pending recommendations to approve.');
+        return;
+      }
+      if (!confirm(`Are you sure you want to approve all ${cachedRecommendations.length} recommendations into active student tasks?`)) return;
+
+      try {
+        const recIds = cachedRecommendations.map(r => r.id);
+        const res = await fetch(`${API_BASE}/api/v1/mentor/recommendations/bulk-approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(recIds)
+        });
+        if (!res.ok) throw new Error('Bulk approval failed');
+        alert('All recommendations successfully converted into student tasks!');
+        loadRecommendations();
+        loadMentorTasks();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // 8. Mentor Task Monitoring Section
+    async function loadMentorTasks() {
+      try {
+        const url = (currentTaskFilter === 'all') 
+          ? `${API_BASE}/api/v1/mentor/tasks`
+          : `${API_BASE}/api/v1/mentor/tasks?status=${currentTaskFilter}`;
+
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch tasks');
+        cachedTasks = await res.json();
+        renderMentorTasks(cachedTasks);
+        updateMentorTaskCounts();
+      } catch (err) {
+        console.error('Task load error:', err);
+      }
+    }
+
+    async function updateMentorTaskCounts() {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/tasks`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const all = await res.json();
+        document.getElementById('mcount-all').textContent = all.length;
+        document.getElementById('kpi-active-tasks').textContent = all.filter(t => t.status !== 'completed').length;
+
+        let pending = 0, inProg = 0, comp = 0, over = 0;
+        all.forEach(t => {
+          if (t.status === 'completed') comp++;
+          else if (t.status === 'overdue') over++;
+          else if (t.status === 'in_progress') inProg++;
+          else pending++;
+        });
+
+        document.getElementById('mcount-pending').textContent = pending;
+        document.getElementById('mcount-in_progress').textContent = inProg;
+        document.getElementById('mcount-completed').textContent = comp;
+        document.getElementById('mcount-overdue').textContent = over;
+      } catch (e) {
+        // silent
+      }
+    }
+
+    function filterMentorTasks(status) {
+      currentTaskFilter = status;
+      ['all', 'pending', 'in_progress', 'completed', 'overdue'].forEach(s => {
+        const tab = document.getElementById(`mtab-${s}`);
+        if (!tab) return;
+        if (s === status) {
+          tab.className = 'px-2.5 py-1 rounded-lg active-filter transition-colors';
+        } else {
+          tab.className = 'px-2.5 py-1 rounded-lg inactive-filter transition-colors';
+        }
+      });
+      loadMentorTasks();
+    }
+
+    function renderMentorTasks(tasks) {
+      const container = document.getElementById('monitored-tasks-feed');
+      if (!container) return;
+
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="py-10 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <span class="material-symbols-outlined text-[32px] text-slate-300">task_alt</span>
+            <div class="text-xs font-semibold text-slate-600 mt-1">No tasks in this category</div>
+            <div class="text-[11px] text-slate-400">Click "Assign Task" or approve an intelligent recommendation above.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = tasks.map(t => {
+        const isDone = (t.status === 'completed');
+        const isOverdue = (t.status === 'overdue');
+
+        let statusBadge = 'bg-blue-50 text-blue-700 border-blue-200';
+        if (isDone) statusBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        if (isOverdue) statusBadge = 'bg-red-50 text-red-700 border-red-200';
+        if (t.status === 'in_progress') statusBadge = 'bg-purple-50 text-purple-700 border-purple-200';
+
+        return `
+          <div class="p-4 rounded-xl border ${isDone ? 'bg-slate-50/60 border-slate-200 opacity-80' : (isOverdue ? 'bg-red-50/20 border-red-200' : 'bg-white border-slate-200')} hover:border-slate-300 transition-all space-y-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary uppercase">${t.course_code || 'ACADEMIC'}</span>
+                <span class="text-xs font-bold text-slate-800">${t.title}</span>
+                <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                  <span class="material-symbols-outlined text-[13px] text-slate-400">person</span>
+                  <span>${t.student_name} (${t.registration_number})</span>
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
+                <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${statusBadge}">${t.status.toUpperCase()}</span>
+                <span class="text-[11px] text-slate-500 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">event</span>
+                  <span>Due: ${t.due_date ? new Date(t.due_date).toLocaleDateString() : 'None'}</span>
+                </span>
+              </div>
+            </div>
+
+            ${t.description ? `<p class="text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded-lg leading-relaxed">${t.description}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 9. Assign Academic Task Modal
+    function openAssignTaskModal(studentId = null) {
+      document.getElementById('modal-rec-id').value = '';
+      document.getElementById('modal-task-heading').textContent = 'Assign Academic Task';
+      if (studentId) {
+        document.getElementById('modal-student-select').value = studentId;
+      }
+      document.getElementById('assign-task-modal').classList.remove('hidden');
+    }
+
+    function closeAssignTaskModal() {
+      document.getElementById('assign-task-modal').classList.add('hidden');
+    }
+
+    async function submitMentorTask(e) {
+      e.preventDefault();
+      const recId = document.getElementById('modal-rec-id').value;
+      const studentId = parseInt(document.getElementById('modal-student-select').value, 10);
+      const course = document.getElementById('modal-course-code').value;
+      const priority = document.getElementById('modal-task-priority').value;
+      const title = document.getElementById('modal-task-title').value.trim();
+      const desc = document.getElementById('modal-task-desc').value.trim();
+      const dueDate = document.getElementById('modal-task-due').value;
+
+      if (!title || !studentId) return;
+
+      if (recId) {
+        // Approving a recommendation
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/mentor/recommendations/${recId}/approve`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              title: title,
+              description: desc || null,
+              priority: priority,
+              due_date: dueDate ? new Date(dueDate).toISOString() : null
+            })
+          });
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.detail || 'Approval failed');
+          }
+          alert('Recommended task approved and assigned!');
+          closeAssignTaskModal();
+          loadRecommendations();
+          loadMentorTasks();
+        } catch (err) {
+          alert(err.message);
+        }
+      } else {
+        // Standard Manual Task
+        const payload = {
+          student_id: studentId,
+          course_code: course,
+          priority: priority,
+          title: title,
+          description: desc || null,
+          due_date: dueDate ? new Date(dueDate).toISOString() : null
+        };
+
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/mentor/tasks`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.detail || 'Failed to assign task');
+          }
+          alert('Academic task successfully assigned to mentee!');
+          closeAssignTaskModal();
+          document.getElementById('assign-task-form').reset();
+          loadMentorTasks();
+          if (activeDrawerStudentId === studentId) {
+            loadDrawerStudentTasks(studentId);
+          }
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+    }
+
+    // 10. Mentoring Meeting Workflow Functions
+    function openLogMeetingModal(studentId = null) {
+      const now = new Date();
+      const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+      document.getElementById('meeting-date').value = localIso;
+      document.getElementById('meeting-duration').value = 30;
+      document.getElementById('meeting-summary').value = '';
+      document.getElementById('meeting-concerns').value = '';
+      document.getElementById('meeting-actions').value = '';
+      document.getElementById('meeting-followup-date').value = '';
+
+      if (studentId) {
+        document.getElementById('meeting-student-select').value = studentId;
+      }
+      document.getElementById('log-meeting-modal').classList.remove('hidden');
+    }
+
+    function closeLogMeetingModal() {
+      document.getElementById('log-meeting-modal').classList.add('hidden');
+    }
+
+    async function submitMentorMeeting(e) {
+      e.preventDefault();
+      const studentId = parseInt(document.getElementById('meeting-student-select').value, 10);
+      const meetingDate = document.getElementById('meeting-date').value;
+      const meetingType = document.getElementById('meeting-type').value;
+      const duration = parseInt(document.getElementById('meeting-duration').value, 10);
+      const summary = document.getElementById('meeting-summary').value.trim();
+      const concerns = document.getElementById('meeting-concerns').value.trim() || null;
+      const actions = document.getElementById('meeting-actions').value.trim() || null;
+      const followupDate = document.getElementById('meeting-followup-date').value || null;
+
+      if (!studentId || !meetingDate || !summary) return;
+
+      const payload = {
+        student_id: studentId,
+        meeting_date: new Date(meetingDate).toISOString(),
+        meeting_type: meetingType,
+        duration_minutes: duration,
+        discussion_summary: summary,
+        academic_concerns: concerns,
+        agreed_actions: actions,
+        next_followup_date: followupDate ? new Date(followupDate).toISOString() : null,
+        meeting_status: 'completed',
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/meetings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Failed to record meeting');
+        }
+
+        alert('Mentoring session successfully recorded in institutional log!');
+        closeLogMeetingModal();
+        document.getElementById('log-meeting-form').reset();
+        if (activeDrawerStudentId === studentId) {
+          loadDrawerStudentMeetings(studentId);
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function loadDrawerStudentMeetings(studentId) {
+      const container = document.getElementById('drawer-student-meetings-list');
+      const countEl = document.getElementById('drawer-student-meetings-count');
+      if (!container || !countEl) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/mentor/meetings?student_id=${studentId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const meetings = await res.json();
+          countEl.textContent = `${meetings.length} sessions`;
+          if (meetings.length === 0) {
+            container.innerHTML = `<div class="p-3 text-center bg-slate-50 rounded-lg text-slate-400 text-xs italic">No formal mentoring sessions recorded for this student yet.</div>`;
+            return;
+          }
+
+          container.innerHTML = meetings.map(m => {
+            const mDate = new Date(m.meeting_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const hasFollowup = !!m.next_followup_date;
+            const fDate = hasFollowup ? new Date(m.next_followup_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+            return `
+              <div class="p-3 rounded-xl border border-slate-200 bg-white space-y-1.5 text-xs shadow-sm">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5 font-bold text-primary">
+                    <span class="material-symbols-outlined text-[15px] text-secondary">calendar_today</span>
+                    <span>${mDate}</span>
+                    <span class="text-[10px] text-slate-400 font-normal">(${m.meeting_type} • ${m.duration_minutes}m)</span>
+                  </div>
+                  ${hasFollowup ? `
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${m.followup_status === 'Overdue' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+                      Follow-up: ${fDate} (${m.followup_status})
+                    </span>
+                  ` : ''}
+                </div>
+                <p class="text-slate-700 leading-relaxed font-medium">${m.discussion_summary}</p>
+                ${m.academic_concerns ? `
+                  <div class="p-2 rounded bg-amber-50/70 border border-amber-200/60 text-[11px] text-amber-900">
+                    <span class="font-bold">Concerns:</span> ${m.academic_concerns}
+                  </div>
+                ` : ''}
+                ${m.agreed_actions ? `
+                  <div class="p-2 rounded bg-sky-50/70 border border-sky-200/60 text-[11px] text-sky-900">
+                    <span class="font-bold">Agreed Actions:</span> ${m.agreed_actions}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.error('Failed to load mentee meetings in drawer:', err);
+      }
+    }
+
+    // 11. Role Switcher Demo Pill
+    function renderRoleSwitcher() {
+      const bar = document.createElement('div');
+      bar.id = 'role-switcher-bar';
+      bar.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; align-items: center; gap: 8px; background: rgba(43, 38, 35, 0.94); backdrop-filter: blur(14px); padding: 7px 16px; border-radius: 9999px; box-shadow: 0 16px 36px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.18); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px;">
+          <span style="color: #fed7aa; font-weight: 700; margin-right: 4px; display: flex; align-items: center; gap: 5px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #f97316; display: inline-block;"></span> [Demo Switcher]
+          </span>
+          <a href="${isFile ? 'student.html' : '/student'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Student</a>
+          <a href="${isFile ? 'mentor.html' : '/mentor'}" style="color: #ffffff; text-decoration: none; padding: 4px 11px; border-radius: 9999px; background: #ea580c; font-weight: 700; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">Mentor</a>
+          <a href="${isFile ? 'admin.html' : '/admin'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Admin</a>
+          <a href="${isFile ? 'lab.html' : '/lab'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Lab</a>
+          <a href="${isFile ? 'login.html' : '/login'}" onclick="logout(); return false;" style="color: #fca5a5; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(239,68,68,0.18); font-weight: 600; margin-left: 4px;">Logout</a>
+        </div>
+      `;
+      document.body.appendChild(bar);
+    }
+
+    renderRoleSwitcher();
+    loadMentorDashboard();
+  </script>
+</body>
+</html>

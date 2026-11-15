@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LPU-RISK-01 • Research & Algorithm Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#00254c",
+            "primary-container": "#173b68",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#87a6da",
+            secondary: "#296199",
+            background: "#f8f9ff",
+            surface: "#f8f9ff",
+            "surface-lowest": "#ffffff",
+            "surface-container": "#e6eeff",
+            "surface-container-high": "#dde9ff",
+            "on-surface": "#101c2c",
+            "on-surface-variant": "#43474f",
+            outline: "#737780",
+            "outline-variant": "#c3c6d0",
+            success: "#006c4c",
+            "success-container": "#8df5c6",
+            warning: "#825500",
+            "warning-container": "#ffddb1",
+            error: "#ba1a1a",
+            "error-container": "#ffdad6"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    .node-circle { transition: all 0.3s ease; }
+    .edge-line { transition: stroke 0.3s ease, stroke-width 0.3s ease; }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="h-16 bg-surface-lowest border-b border-surface-container flex items-center justify-between px-6 sticky top-0 z-40 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm tracking-tight">LR</div>
+      <div>
+        <h1 class="text-sm font-bold text-primary tracking-tight">LPU-RISK-01</h1>
+        <p class="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">CSE276 Research & Algorithm Lab</p>
+      </div>
+    </div>
+
+    <!-- Lab Sub-Navigation Tabs -->
+    <div class="flex items-center gap-1 bg-surface-container p-1 rounded-lg">
+      <button onclick="switchTab('search')" id="tab-btn-search" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-primary shadow-sm transition-all flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">account_tree</span>
+        <span>Search State-Space</span>
+      </button>
+      <button onclick="switchTab('knowledge')" id="tab-btn-knowledge" class="px-3 py-1.5 rounded-md text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">hub</span>
+        <span>Knowledge & Logic</span>
+      </button>
+      <button onclick="switchTab('bayesian')" id="tab-btn-bayesian" class="px-3 py-1.5 rounded-md text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">calculate</span>
+        <span>Bayesian Lab</span>
+      </button>
+      <button onclick="switchTab('models')" id="tab-btn-models" class="px-3 py-1.5 rounded-md text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">compare</span>
+        <span>Model Benchmark</span>
+      </button>
+      <button onclick="switchTab('dataset')" id="tab-btn-dataset" class="px-3 py-1.5 rounded-md text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">database</span>
+        <span>Dataset Explorer</span>
+      </button>
+    </div>
+
+    <!-- Quick Role Links -->
+    <div class="flex items-center gap-2">
+      <a href="/mentor" class="px-2.5 py-1 text-xs font-semibold text-primary hover:bg-surface-container rounded-md transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">supervisor_account</span>
+        <span>Mentor Workspace</span>
+      </a>
+      <a href="/admin" class="px-2.5 py-1 text-xs font-semibold text-on-surface-variant hover:bg-surface-container rounded-md transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+        <span>Admin Dashboard</span>
+      </a>
+      <a href="/student" class="px-2.5 py-1 text-xs font-semibold text-on-surface-variant hover:bg-surface-container rounded-md transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">school</span>
+        <span>Student Portal</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
+
+    <!-- ==================== 1. SEARCH ALGORITHM LAB ==================== -->
+    <section id="pane-search" class="space-y-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-primary tracking-tight">Academic Intervention State-Space Search</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">
+            Demonstrating CSE276 Unit II Problem Formulation & Search: BFS, DFS, Best-First, Hill Climbing, and A* ($f(n) = g(n) + h(n)$).
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="runComparisonBenchmark()" class="px-3 py-2 bg-surface-lowest border border-outline-variant text-primary rounded-lg text-xs font-semibold hover:bg-surface-container transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">table_rows</span>
+            <span>Compare All 5 Algorithms</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Controls & Execution Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- Algorithm Control Panel -->
+        <div class="bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm flex flex-col justify-between">
+          <div class="space-y-4">
+            <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Search Configuration</h3>
+            
+            <div>
+              <label class="block text-xs font-medium text-on-surface-variant mb-1">Algorithm</label>
+              <select id="sel-algo" class="w-full text-xs bg-surface border border-outline-variant rounded-lg p-2 font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="A*" selected>A* Search (f = g + h)</option>
+                <option value="BFS">Breadth-First Search (BFS)</option>
+                <option value="DFS">Depth-First Search (DFS)</option>
+                <option value="Best-First">Greedy Best-First Search</option>
+                <option value="Hill Climbing">Hill Climbing (Local Search)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-on-surface-variant mb-1">Starting State</label>
+              <select id="sel-start" class="w-full text-xs bg-surface border border-outline-variant rounded-lg p-2 font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="INITIAL_REVIEW" selected>INITIAL_REVIEW</option>
+                <option value="MENTOR_MEETING">MENTOR_MEETING</option>
+                <option value="ATTENDANCE_SUPPORT">ATTENDANCE_SUPPORT</option>
+                <option value="SUBJECT_TUTORING">SUBJECT_TUTORING</option>
+                <option value="ASSIGNMENT_PLANNING">ASSIGNMENT_PLANNING</option>
+                <option value="FACULTY_REFERRAL">FACULTY_REFERRAL</option>
+                <option value="FOLLOW_UP_REVIEW">FOLLOW_UP_REVIEW</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-on-surface-variant mb-1">Goal State</label>
+              <select id="sel-goal" class="w-full text-xs bg-surface border border-outline-variant rounded-lg p-2 font-medium text-on-surface focus:outline-none focus:ring-2 focus:ring-primary">
+                <option value="PLAN_COMPLETED" selected>PLAN_COMPLETED</option>
+                <option value="FOLLOW_UP_REVIEW">FOLLOW_UP_REVIEW</option>
+                <option value="SUBJECT_TUTORING">SUBJECT_TUTORING</option>
+              </select>
+            </div>
+
+            <button onclick="executeSingleAlgorithm()" class="w-full py-2.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary-container transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+              <span>Execute Algorithm</span>
+            </button>
+          </div>
+
+          <!-- Execution Metrics Card -->
+          <div id="search-metrics-card" class="mt-4 pt-4 border-t border-surface-container space-y-2 text-xs">
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Nodes Expanded:</span>
+              <span id="metric-expanded" class="font-bold text-primary">0</span>
+            </div>
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Path Steps:</span>
+              <span id="metric-steps" class="font-bold text-primary">0</span>
+            </div>
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Effort Cost g(n):</span>
+              <span id="metric-cost" class="font-bold text-primary">0.0h</span>
+            </div>
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Execution Time:</span>
+              <span id="metric-time" class="font-bold text-primary">0.0 ms</span>
+            </div>
+            <div class="flex justify-between text-on-surface-variant">
+              <span>Status:</span>
+              <span id="metric-status" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-surface-container text-primary">READY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive State-Space Visual Canvas -->
+        <div class="lg:col-span-3 bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-primary uppercase tracking-wider">Intervention State Graph</span>
+              <span class="text-[10px] px-2 py-0.5 bg-surface-container text-secondary rounded-full font-semibold">8 States • 12 Transitions</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] text-on-surface-variant">
+              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary inline-block"></span><span>Path</span></div>
+              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary inline-block"></span><span>Visited</span></div>
+              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block"></span><span>Unvisited</span></div>
+            </div>
+          </div>
+
+          <!-- SVG Graph Display -->
+          <div class="relative w-full h-80 bg-surface rounded-lg border border-surface-container overflow-hidden flex items-center justify-center">
+            <svg id="state-graph-svg" class="w-full h-full" viewBox="0 0 760 320">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#737780" />
+                </marker>
+                <marker id="arrow-active" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#00254c" />
+                </marker>
+              </defs>
+
+              <!-- Edges (Source to Destination) -->
+              <!-- T01: INITIAL -> MENTOR -->
+              <line id="edge-INITIAL_REVIEW-MENTOR_MEETING" x1="80" y1="160" x2="200" y2="90" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T02: INITIAL -> ATTENDANCE -->
+              <line id="edge-INITIAL_REVIEW-ATTENDANCE_SUPPORT" x1="80" y1="160" x2="200" y2="230" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T03: MENTOR -> ATTENDANCE -->
+              <line id="edge-MENTOR_MEETING-ATTENDANCE_SUPPORT" x1="200" y1="90" x2="200" y2="230" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T04: MENTOR -> TUTORING -->
+              <line id="edge-MENTOR_MEETING-SUBJECT_TUTORING" x1="200" y1="90" x2="380" y2="50" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T05: MENTOR -> ASSIGNMENT -->
+              <line id="edge-MENTOR_MEETING-ASSIGNMENT_PLANNING" x1="200" y1="90" x2="380" y2="120" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T06: MENTOR -> FACULTY -->
+              <line id="edge-MENTOR_MEETING-FACULTY_REFERRAL" x1="200" y1="90" x2="380" y2="190" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T07: ATTENDANCE -> FOLLOW_UP -->
+              <line id="edge-ATTENDANCE_SUPPORT-FOLLOW_UP_REVIEW" x1="200" y1="230" x2="560" y2="160" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T08: TUTORING -> FOLLOW_UP -->
+              <line id="edge-SUBJECT_TUTORING-FOLLOW_UP_REVIEW" x1="380" y1="50" x2="560" y2="160" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T09: ASSIGNMENT -> FOLLOW_UP -->
+              <line id="edge-ASSIGNMENT_PLANNING-FOLLOW_UP_REVIEW" x1="380" y1="120" x2="560" y2="160" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T10: FACULTY -> FOLLOW_UP -->
+              <line id="edge-FACULTY_REFERRAL-FOLLOW_UP_REVIEW" x1="380" y1="190" x2="560" y2="160" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+              <!-- T11: FOLLOW_UP -> PLAN_COMPLETED -->
+              <line id="edge-FOLLOW_UP_REVIEW-PLAN_COMPLETED" x1="560" y1="160" x2="690" y2="160" stroke="#c3c6d0" stroke-width="2" marker-end="url(#arrow)" class="edge-line"/>
+
+              <!-- State Nodes -->
+              <!-- INITIAL_REVIEW -->
+              <g id="node-INITIAL_REVIEW" transform="translate(80, 160)">
+                <circle r="22" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="9" font-weight="bold" fill="#00254c">INITIAL</text>
+                <text y="34" text-anchor="middle" font-size="9" fill="#43474f">h=3.0</text>
+              </g>
+
+              <!-- MENTOR_MEETING -->
+              <g id="node-MENTOR_MEETING" transform="translate(200, 90)">
+                <circle r="22" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#00254c">MENTOR</text>
+                <text y="34" text-anchor="middle" font-size="9" fill="#43474f">h=2.0</text>
+              </g>
+
+              <!-- ATTENDANCE_SUPPORT -->
+              <g id="node-ATTENDANCE_SUPPORT" transform="translate(200, 230)">
+                <circle r="22" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#00254c">ATTEND</text>
+                <text y="34" text-anchor="middle" font-size="9" fill="#43474f">h=2.0</text>
+              </g>
+
+              <!-- SUBJECT_TUTORING -->
+              <g id="node-SUBJECT_TUTORING" transform="translate(380, 50)">
+                <circle r="20" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#00254c">TUTOR</text>
+                <text y="32" text-anchor="middle" font-size="9" fill="#43474f">h=2.5</text>
+              </g>
+
+              <!-- ASSIGNMENT_PLANNING -->
+              <g id="node-ASSIGNMENT_PLANNING" transform="translate(380, 120)">
+                <circle r="20" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="7" font-weight="bold" fill="#00254c">ASSIGN</text>
+                <text y="32" text-anchor="middle" font-size="9" fill="#43474f">h=1.5</text>
+              </g>
+
+              <!-- FACULTY_REFERRAL -->
+              <g id="node-FACULTY_REFERRAL" transform="translate(380, 190)">
+                <circle r="20" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="7" font-weight="bold" fill="#00254c">REFER</text>
+                <text y="32" text-anchor="middle" font-size="9" fill="#43474f">h=1.5</text>
+              </g>
+
+              <!-- FOLLOW_UP_REVIEW -->
+              <g id="node-FOLLOW_UP_REVIEW" transform="translate(560, 160)">
+                <circle r="22" fill="#eff3ff" stroke="#737780" stroke-width="2" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#00254c">REVIEW</text>
+                <text y="34" text-anchor="middle" font-size="9" fill="#43474f">h=0.5</text>
+              </g>
+
+              <!-- PLAN_COMPLETED -->
+              <g id="node-PLAN_COMPLETED" transform="translate(690, 160)">
+                <circle r="24" fill="#eff3ff" stroke="#006c4c" stroke-width="3" class="node-circle" />
+                <text y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#006c4c">GOAL</text>
+                <text y="36" text-anchor="middle" font-size="9" fill="#006c4c">h=0.0</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Academic Explanation Output -->
+          <div class="mt-3 p-3 bg-surface rounded-lg border border-surface-container text-xs">
+            <span class="font-bold text-primary">Pedagogical Explanation:</span>
+            <p id="search-explanation-text" class="text-on-surface-variant mt-1">
+              Select an algorithm and click "Execute Algorithm" to inspect state traversal, path selection, and effort cost.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison Benchmark Table Modal/Area -->
+      <div id="search-comparison-area" class="bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm hidden">
+        <h3 class="text-xs font-bold text-primary uppercase tracking-wider mb-3">All 5 Algorithms Benchmark Matrix</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-surface-container text-on-surface font-semibold border-b border-surface-container-high">
+              <tr>
+                <th class="p-2.5">Algorithm</th>
+                <th class="p-2.5">Path Traversed</th>
+                <th class="p-2.5 text-center">Steps</th>
+                <th class="p-2.5 text-center">Nodes Expanded</th>
+                <th class="p-2.5 text-center">Cost g(n)</th>
+                <th class="p-2.5 text-center">Time</th>
+                <th class="p-2.5 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="comparison-tbody" class="divide-y divide-surface-container">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. KNOWLEDGE REPRESENTATION LAB ==================== -->
+    <section id="pane-knowledge" class="space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-primary tracking-tight">Knowledge Representation & Logical Reasoning</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">
+          Demonstrating CSE276 Unit II: Minsky Frames, First-Order Predicates, Production Rules (R1–R4), and Propositional Inference.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Live Evidence Inputs -->
+        <div class="bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm space-y-4">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Student Telemetry Input</h3>
+          
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-on-surface-variant">Attendance Percentage:</span>
+              <span id="lbl-att" class="font-bold text-primary">68%</span>
+            </div>
+            <input type="range" id="input-att" min="40" max="100" value="68" class="w-full accent-primary" oninput="updateKnowledgeView()">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-on-surface-variant">Assessment Drop (%):</span>
+              <span id="lbl-drop" class="font-bold text-primary">12%</span>
+            </div>
+            <input type="range" id="input-drop" min="0" max="30" value="12" class="w-full accent-primary" oninput="updateKnowledgeView()">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-on-surface-variant">Missing/Overdue Tasks:</span>
+              <span id="lbl-missing" class="font-bold text-primary">2</span>
+            </div>
+            <input type="range" id="input-missing" min="0" max="6" value="2" class="w-full accent-primary" oninput="updateKnowledgeView()">
+          </div>
+
+          <!-- Minsky Frame Structure Viewer -->
+          <div class="pt-3 border-t border-surface-container">
+            <h4 class="text-[11px] font-bold text-on-surface uppercase tracking-wider mb-2">Instantiated Student Frame</h4>
+            <pre id="frame-json" class="p-3 bg-surface rounded-lg text-[10px] text-on-surface font-mono overflow-x-auto leading-relaxed border border-surface-container"></pre>
+          </div>
+        </div>
+
+        <!-- First-Order Predicates & Production Rules (R1-R4) -->
+        <div class="lg:col-span-2 bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm space-y-4">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Evaluated First-Order Predicates & Production Rules</h3>
+          
+          <!-- Predicates Grid -->
+          <div class="grid grid-cols-2 gap-3" id="predicates-container">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Production Rules R1-R4 -->
+          <div class="pt-2">
+            <h4 class="text-[11px] font-bold text-on-surface uppercase tracking-wider mb-2">Production Rules Execution Trace (R1–R4)</h4>
+            <div class="space-y-2.5" id="rules-container">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+
+          <!-- Propositional Logic Formula Trace -->
+          <div class="pt-3 border-t border-surface-container">
+            <h4 class="text-[11px] font-bold text-on-surface uppercase tracking-wider mb-1">Propositional Inference</h4>
+            <p class="text-xs font-mono text-primary font-semibold">
+              (LowAttendance ∨ (DecliningPerformance ∧ IncompleteAssignments)) → NeedsMentorReview
+            </p>
+            <div id="prop-result-badge" class="mt-2 inline-block px-2.5 py-1 rounded text-xs font-bold bg-success-container text-success">
+              Formula Evaluated: TRUE
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. BAYESIAN REASONING LAB ==================== -->
+    <section id="pane-bayesian" class="space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-primary tracking-tight">Bayesian Reasoning & Evidence Update Lab</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">
+          Demonstrating CSE276 Unit II: P(H|E) = [P(E|H) • P(H)] / P(E) with transparent likelihoods and normalization proofs.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Controls -->
+        <div class="bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm space-y-4">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Prior & Observed Evidence</h3>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-on-surface-variant">Prior Probability P(H):</span>
+              <span id="lbl-bayes-prior" class="font-bold text-primary">0.22</span>
+            </div>
+            <input type="range" id="input-bayes-prior" min="5" max="80" value="22" class="w-full accent-primary" oninput="updateBayesLab()">
+            <p class="text-[10px] text-on-surface-variant mt-1">Base rate of students needing intervention in historical cohort.</p>
+          </div>
+
+          <div class="space-y-2 pt-2 border-t border-surface-container">
+            <span class="text-xs font-bold text-on-surface">Observed Evidence Checklist:</span>
+            
+            <label class="flex items-center gap-2 text-xs text-on-surface cursor-pointer">
+              <input type="checkbox" id="chk-bayes-att" checked class="rounded text-primary" onchange="updateBayesLab()">
+              <span>Attendance &lt; 75% (E₁)</span>
+            </label>
+
+            <label class="flex items-center gap-2 text-xs text-on-surface cursor-pointer">
+              <input type="checkbox" id="chk-bayes-marks" checked class="rounded text-primary" onchange="updateBayesLab()">
+              <span>Continuous Assessment Drop &ge; 10% (E₂)</span>
+            </label>
+
+            <label class="flex items-center gap-2 text-xs text-on-surface cursor-pointer">
+              <input type="checkbox" id="chk-bayes-work" class="rounded text-primary" onchange="updateBayesLab()">
+              <span>&ge; 2 Overdue Submissions (E₃)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Calculation Display -->
+        <div class="lg:col-span-2 bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm space-y-4">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Transparent Calculation Breakdown</h3>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="p-3 bg-surface rounded-lg border border-surface-container">
+              <span class="text-[10px] uppercase font-semibold text-on-surface-variant">Prior P(H)</span>
+              <p id="bayes-val-prior" class="text-base font-bold text-primary mt-1">0.2200</p>
+            </div>
+            <div class="p-3 bg-surface rounded-lg border border-surface-container">
+              <span class="text-[10px] uppercase font-semibold text-on-surface-variant">Likelihood P(E|H)</span>
+              <p id="bayes-val-lik-h" class="text-base font-bold text-primary mt-1">0.4896</p>
+            </div>
+            <div class="p-3 bg-surface rounded-lg border border-surface-container">
+              <span class="text-[10px] uppercase font-semibold text-on-surface-variant">Marginal P(E)</span>
+              <p id="bayes-val-marginal" class="text-base font-bold text-primary mt-1">0.1288</p>
+            </div>
+            <div class="p-3 bg-primary-container text-white rounded-lg shadow-sm">
+              <span class="text-[10px] uppercase font-semibold text-on-primary-container">Posterior P(H|E)</span>
+              <p id="bayes-val-posterior" class="text-lg font-bold text-white mt-1">0.8362</p>
+            </div>
+          </div>
+
+          <!-- Formula Step Breakdown -->
+          <div class="p-4 bg-surface rounded-lg border border-surface-container text-xs space-y-2">
+            <p class="font-bold text-primary">Formula Representation:</p>
+            <p class="font-mono text-[11px] bg-white p-2 rounded border border-surface-container">
+              P(H|E) = [P(E|H) × P(H)] / [P(E|H)×P(H) + P(E|¬H)×P(¬H)]
+            </p>
+            <div class="text-[11px] text-on-surface-variant space-y-1">
+              <p>• Numerator = <span id="bayes-step-num" class="font-mono font-bold text-on-surface">0.1077</span></p>
+              <p>• Denominator Term 2 = P(E|¬H) × P(¬H) = <span id="bayes-step-den2" class="font-mono font-bold text-on-surface">0.0211</span></p>
+              <p>• Likelihood Ratio (Bayes Factor) = <span id="bayes-step-lr" class="font-mono font-bold text-on-surface">5.11</span></p>
+              <p>• Normalization Check: P(H|E) + P(¬H|E) = <span class="font-mono font-bold text-success">1.0000</span> (Normalized)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. MODEL COMPARISON LAB ==================== -->
+    <section id="pane-models" class="space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-primary tracking-tight">Machine Learning Model Comparison & Segmentation</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">
+          Demonstrating CSE276 Unit IV: Supervised benchmarking (Recall, Precision, PR-AUC, F2) and K-Means exploratory clustering.
+        </p>
+      </div>
+
+      <!-- Supervised Benchmark Table -->
+      <div class="bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm space-y-3">
+        <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Supervised Classifiers Performance Matrix</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-surface-container text-on-surface font-semibold border-b border-surface-container-high">
+              <tr>
+                <th class="p-2.5">Model</th>
+                <th class="p-2.5">Category</th>
+                <th class="p-2.5 text-center">Recall</th>
+                <th class="p-2.5 text-center">Precision</th>
+                <th class="p-2.5 text-center">F1</th>
+                <th class="p-2.5 text-center">F2</th>
+                <th class="p-2.5 text-center">PR-AUC</th>
+                <th class="p-2.5 text-center">Brier Score</th>
+                <th class="p-2.5 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody id="models-table-body" class="divide-y divide-surface-container">
+              <!-- Loaded via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- K-Means Student Personas -->
+      <div class="bg-surface-lowest p-5 rounded-xl border border-surface-container shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Unsupervised K-Means Behavioral Personas (k=4)</h3>
+          <span class="text-[10px] px-2 py-0.5 bg-surface-container text-on-surface-variant rounded font-semibold">Exploratory Segmentation</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="kmeans-container">
+          <!-- Loaded via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. DATASET EXPLORER ==================== -->
+    <section id="pane-dataset" class="space-y-6 hidden">
+      <div>
+        <h2 class="text-xl font-bold text-primary tracking-tight">Dataset Provenance & Cohort Distributions</h2>
+        <p class="text-xs text-on-surface-variant mt-0.5">
+          Demonstrating CSE276 Unit I & III: Synthetic LPU Touch cohort provenance, feature schemas, and temporal leakage prevention.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="dataset-summary-cards">
+        <!-- Loaded via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Frontend Logic -->
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      ['search', 'knowledge', 'bayesian', 'models', 'dataset'].forEach(t => {
+        document.getElementById(`pane-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+        btn.classList.add('text-on-surface-variant');
+      });
+      document.getElementById(`pane-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      activeBtn.classList.add('bg-white', 'text-primary', 'shadow-sm');
+      activeBtn.classList.remove('text-on-surface-variant');
+
+      if (tabId === 'models') loadModelsTab();
+      if (tabId === 'dataset') loadDatasetTab();
+    }
+
+    // 1. Search Lab Functions
+    async function executeSingleAlgorithm() {
+      const algo = document.getElementById('sel-algo').value;
+      const start = document.getElementById('sel-start').value;
+      const goal = document.getElementById('sel-goal').value;
+
+      try {
+        const res = await fetch('/api/v1/research/search/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ algorithm: algo, start_state: start, goal_state: goal })
+        });
+        const data = await res.json();
+        
+        // Update Metrics
+        document.getElementById('metric-expanded').textContent = data.nodes_expanded;
+        document.getElementById('metric-steps').textContent = data.step_count;
+        document.getElementById('metric-cost').textContent = data.path_cost.toFixed(1) + 'h';
+        document.getElementById('metric-time').textContent = data.duration_ms.toFixed(2) + ' ms';
+        document.getElementById('metric-status').textContent = data.completion_status;
+        document.getElementById('search-explanation-text').textContent = data.explanation;
+
+        // Visual Graph Highlighting
+        highlightGraph(data.visited_nodes, data.path);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function highlightGraph(visited, path) {
+      // Reset all nodes
+      const allNodes = ['INITIAL_REVIEW', 'MENTOR_MEETING', 'ATTENDANCE_SUPPORT', 'SUBJECT_TUTORING', 'ASSIGNMENT_PLANNING', 'FACULTY_REFERRAL', 'FOLLOW_UP_REVIEW', 'PLAN_COMPLETED'];
+      allNodes.forEach(id => {
+        const g = document.getElementById(`node-${id}`);
+        if (!g) return;
+        const circle = g.querySelector('circle');
+        circle.setAttribute('fill', '#eff3ff');
+        circle.setAttribute('stroke', '#737780');
+        circle.setAttribute('stroke-width', '2');
+      });
+
+      // Reset all edges
+      document.querySelectorAll('.edge-line').forEach(el => {
+        el.setAttribute('stroke', '#c3c6d0');
+        el.setAttribute('stroke-width', '2');
+        el.setAttribute('marker-end', 'url(#arrow)');
+      });
+
+      // Highlight visited
+      visited.forEach(id => {
+        const g = document.getElementById(`node-${id}`);
+        if (g) {
+          const circle = g.querySelector('circle');
+          circle.setAttribute('fill', '#dde9ff');
+          circle.setAttribute('stroke', '#296199');
+        }
+      });
+
+      // Highlight path nodes and edges
+      for (let i = 0; i < path.length; i++) {
+        const id = path[i];
+        const g = document.getElementById(`node-${id}`);
+        if (g) {
+          const circle = g.querySelector('circle');
+          circle.setAttribute('fill', '#00254c');
+          circle.setAttribute('stroke', '#8df5c6');
+          circle.setAttribute('stroke-width', '3');
+          const txt = g.querySelectorAll('text')[0];
+          txt.setAttribute('fill', '#ffffff');
+        }
+
+        if (i < path.length - 1) {
+          const edgeId = `edge-${path[i]}-${path[i+1]}`;
+          const edgeEl = document.getElementById(edgeId);
+          if (edgeEl) {
+            edgeEl.setAttribute('stroke', '#00254c');
+            edgeEl.setAttribute('stroke-width', '4');
+            edgeEl.setAttribute('marker-end', 'url(#arrow-active)');
+          }
+        }
+      }
+    }
+
+    async function runComparisonBenchmark() {
+      const area = document.getElementById('search-comparison-area');
+      area.classList.remove('hidden');
+      const start = document.getElementById('sel-start').value;
+      const goal = document.getElementById('sel-goal').value;
+
+      try {
+        const res = await fetch(`/api/v1/research/search/comparison?start_state=${start}&goal_state=${goal}`);
+        const data = await res.json();
+        const tbody = document.getElementById('comparison-tbody');
+        tbody.innerHTML = '';
+
+        data.comparison.forEach(c => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-surface transition-colors';
+          tr.innerHTML = `
+            <td class="p-2.5 font-bold text-primary">${c.algorithm}</td>
+            <td class="p-2.5 font-mono text-[10px] text-on-surface-variant">${c.path.join(' → ')}</td>
+            <td class="p-2.5 text-center font-semibold">${c.step_count}</td>
+            <td class="p-2.5 text-center font-semibold">${c.nodes_expanded}</td>
+            <td class="p-2.5 text-center font-semibold">${c.path_cost.toFixed(1)}h</td>
+            <td class="p-2.5 text-center font-mono">${c.duration_ms.toFixed(2)} ms</td>
+            <td class="p-2.5 text-center font-bold ${c.completion_status === 'SUCCESS' ? 'text-success' : 'text-warning'}">${c.completion_status}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 2. Knowledge Lab Functions
+    async function updateKnowledgeView() {
+      const att = parseFloat(document.getElementById('input-att').value);
+      const drop = parseFloat(document.getElementById('input-drop').value);
+      const missing = parseInt(document.getElementById('input-missing').value);
+
+      document.getElementById('lbl-att').textContent = att + '%';
+      document.getElementById('lbl-drop').textContent = drop + '%';
+      document.getElementById('lbl-missing').textContent = missing;
+
+      try {
+        const res = await fetch('/api/v1/research/knowledge/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            student_id: '12511001',
+            name: 'Aarav Sharma',
+            attendance_pct: att,
+            marks_drop_pct: drop,
+            missing_count: missing,
+            recent_trend: drop >= 10 ? 'declining' : 'steady'
+          })
+        });
+        const data = await res.json();
+
+        // Render Frame
+        document.getElementById('frame-json').textContent = JSON.stringify(data.student_frame, null, 2);
+
+        // Render Predicates
+        const predContainer = document.getElementById('predicates-container');
+        predContainer.innerHTML = '';
+        Object.entries(data.predicates).forEach(([name, val]) => {
+          const div = document.createElement('div');
+          div.className = `p-2.5 rounded-lg border ${val ? 'bg-error-container/20 border-error/30' : 'bg-surface border-surface-container'}`;
+          div.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-[11px] font-bold text-primary">${name}(s)</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${val ? 'bg-error text-white' : 'bg-surface-container text-on-surface-variant'}">${val ? 'TRUE' : 'FALSE'}</span>
+            </div>
+          `;
+          predContainer.appendChild(div);
+        });
+
+        // Render Production Rules
+        const rulesContainer = document.getElementById('rules-container');
+        rulesContainer.innerHTML = '';
+        data.production_rules.forEach(r => {
+          const div = document.createElement('div');
+          div.className = `p-2.5 rounded-lg border text-xs ${r.triggered ? 'bg-warning-container/20 border-warning/40' : 'bg-surface border-surface-container'}`;
+          div.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-primary">${r.rule_id}: ${r.name}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${r.triggered ? 'bg-warning text-white' : 'bg-surface-container text-on-surface-variant'}">${r.triggered ? 'FIRED' : 'NOT MET'}</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant mt-1">${r.explanation}</p>
+          `;
+          rulesContainer.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 3. Bayesian Lab Functions
+    async function updateBayesLab() {
+      const prior = parseFloat(document.getElementById('input-bayes-prior').value) / 100.0;
+      document.getElementById('lbl-bayes-prior').textContent = prior.toFixed(2);
+
+      const hasAtt = document.getElementById('chk-bayes-att').checked;
+      const hasMarks = document.getElementById('chk-bayes-marks').checked;
+      const hasWork = document.getElementById('chk-bayes-work').checked;
+
+      try {
+        const res = await fetch('/api/v1/research/bayesian/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            has_low_attendance: hasAtt,
+            has_low_marks: hasMarks,
+            has_overdue_work: hasWork,
+            prior: prior
+          })
+        });
+        const d = await res.json();
+
+        document.getElementById('bayes-val-prior').textContent = d.prior.toFixed(4);
+        document.getElementById('bayes-val-lik-h').textContent = d.likelihood_P_E_given_H.toFixed(4);
+        document.getElementById('bayes-val-marginal').textContent = d.marginal_likelihood_P_E.toFixed(4);
+        document.getElementById('bayes-val-posterior').textContent = d.posterior.toFixed(4);
+
+        document.getElementById('bayes-step-num').textContent = (d.likelihood_P_E_given_H * d.prior).toFixed(4);
+        document.getElementById('bayes-step-den2').textContent = (d.likelihood_P_E_given_not_H * d.prior_complement).toFixed(4);
+        document.getElementById('bayes-step-lr').textContent = d.likelihood_ratio.toFixed(2);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 4. Model Benchmark Functions
+    async function loadModelsTab() {
+      try {
+        const res = await fetch('/api/v1/research/models/comparison');
+        const data = await res.json();
+
+        // Populate Table
+        const tbody = document.getElementById('models-table-body');
+        tbody.innerHTML = '';
+        data.models.forEach(m => {
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-surface transition-colors';
+          tr.innerHTML = `
+            <td class="p-2.5 font-bold text-primary">${m.model_name}</td>
+            <td class="p-2.5 text-on-surface-variant">${m.category}</td>
+            <td class="p-2.5 text-center font-bold">${m.recall.toFixed(2)}</td>
+            <td class="p-2.5 text-center font-semibold">${m.precision.toFixed(2)}</td>
+            <td class="p-2.5 text-center font-semibold">${m.f1.toFixed(2)}</td>
+            <td class="p-2.5 text-center font-semibold">${m.f2.toFixed(2)}</td>
+            <td class="p-2.5 text-center font-semibold">${m.pr_auc.toFixed(2)}</td>
+            <td class="p-2.5 text-center font-semibold">${m.brier_score.toFixed(2)}</td>
+            <td class="p-2.5 text-center font-bold text-success">${m.status}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Populate K-Means
+        const kmContainer = document.getElementById('kmeans-container');
+        kmContainer.innerHTML = '';
+        data.k_means_segmentation.clusters.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'p-3 bg-surface rounded-lg border border-surface-container text-xs space-y-1';
+          div.innerHTML = `
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-primary">Cluster ${c.cluster_id}</span>
+              <span class="text-[10px] font-bold text-secondary">${c.share_pct}%</span>
+            </div>
+            <p class="font-semibold text-on-surface">${c.label}</p>
+            <div class="text-[10px] text-on-surface-variant pt-1">
+              <span>Avg Att: <b>${c.avg_attendance}%</b></span> • <span>Avg Marks: <b>${c.avg_marks}%</b></span>
+            </div>
+          `;
+          kmContainer.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // 5. Dataset Explorer Functions
+    async function loadDatasetTab() {
+      try {
+        const res = await fetch('/api/v1/research/dataset/summary');
+        const d = await res.json();
+        const container = document.getElementById('dataset-summary-cards');
+        container.innerHTML = `
+          <div class="p-5 bg-surface-lowest rounded-xl border border-surface-container shadow-sm space-y-2">
+            <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Cohort Size & Scope</h4>
+            <p class="text-2xl font-bold text-primary">${d.total_students} Students</p>
+            <p class="text-xs text-on-surface-variant">${d.total_faculty} Faculty • ${d.total_mentors} Faculty Mentors</p>
+            <div class="pt-2 text-xs text-on-surface-variant border-t border-surface-container">
+              <p>Section K3P25IL: <b>${d.academic_sections.K3P25IL || 20}</b></p>
+              <p>Section K3P25IM: <b>${d.academic_sections.K3P25IM || 20}</b></p>
+              <p>Section K3P25IN: <b>${d.academic_sections.K3P25IN || 20}</b></p>
+            </div>
+          </div>
+
+          <div class="p-5 bg-surface-lowest rounded-xl border border-surface-container shadow-sm space-y-2">
+            <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Admission Routes</h4>
+            <div class="space-y-1.5 text-xs text-on-surface-variant">
+              ${Object.entries(d.admission_route_distribution).map(([k, v]) => `
+                <div class="flex justify-between"><span>${k}:</span><b>${v} students</b></div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="p-5 bg-surface-lowest rounded-xl border border-surface-container shadow-sm space-y-2">
+            <h4 class="text-xs font-bold text-primary uppercase tracking-wider">Data Provenance</h4>
+            <p class="text-xs text-on-surface-variant"><b>Source:</b> ${d.provenance}</p>
+            <p class="text-xs text-on-surface-variant"><b>Missing Values:</b> None (0 detected)</p>
+            <p class="text-xs text-on-surface-variant"><b>Leakage Safeguards:</b> ${d.data_leakage_safeguards}</p>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Explicit Demonstration Role Switcher Bar
+    function renderRoleSwitcher() {
+      const isFile = window.location.protocol === 'file:';
+      const bar = document.createElement('div');
+      bar.id = 'role-switcher-bar';
+      bar.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; align-items: center; gap: 8px; background: rgba(43, 38, 35, 0.94); backdrop-filter: blur(14px); padding: 7px 16px; border-radius: 9999px; box-shadow: 0 16px 36px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.18); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px;">
+          <span style="color: #fed7aa; font-weight: 700; margin-right: 4px; display: flex; align-items: center; gap: 5px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #f97316; display: inline-block;"></span> [Demo Switcher]
+          </span>
+          <a href="${isFile ? 'student.html' : '/student'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Student</a>
+          <a href="${isFile ? 'mentor.html' : '/mentor'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Mentor</a>
+          <a href="${isFile ? 'admin.html' : '/admin'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Admin</a>
+          <a href="${isFile ? 'lab.html' : '/lab'}" style="color: #ffffff; text-decoration: none; padding: 4px 11px; border-radius: 9999px; background: #ea580c; font-weight: 700; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">Lab</a>
+          <a href="${isFile ? 'login.html' : '/login'}" onclick="localStorage.removeItem('lpu_auth_token'); localStorage.removeItem('lpu_user'); window.location.href = isFile ? 'login.html' : '/login'; return false;" style="color: #fca5a5; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(239,68,68,0.18); font-weight: 600; margin-left: 4px;">Logout</a>
+        </div>
+      `;
+      document.body.appendChild(bar);
+    }
+
+    // Initial Load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRoleSwitcher();
+      executeSingleAlgorithm();
+      updateKnowledgeView();
+      updateBayesLab();
+    });
+  </script>
+</body>
+</html>

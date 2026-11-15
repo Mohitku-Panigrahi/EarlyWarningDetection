@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="web_dashboard" name="shell-type">
+  <title>Student Academic Workspace — LPU-RISK-01</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            },
+            warmBg: '#f7ebe3',
+            cardBg: '#faeee5',
+            matcha: '#b5d774',
+            coralPill: '#ff8a73',
+            primary: "#ea580c",
+            "primary-container": "#c2410c",
+            "on-primary": "#ffffff",
+            secondary: "#2b2623",
+            surface: "#f7ebe3",
+            "on-surface": "#292320"
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          boxShadow: {
+            'glow-orange': '0 10px 25px -4px rgba(234, 88, 12, 0.4)',
+            'floating-card': '0 16px 36px -8px rgba(180, 140, 125, 0.18), 0 4px 12px -2px rgba(180, 140, 125, 0.08)',
+            'inner-glow': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.9)'
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f7ebe3;
+      color: #292320;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 14px 34px -8px rgba(180, 140, 125, 0.18), 0 4px 12px -2px rgba(180, 140, 125, 0.06);
+    }
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 42px -8px rgba(180, 140, 125, 0.25), 0 6px 14px -2px rgba(180, 140, 125, 0.1);
+      border-color: #ffffff;
+    }
+    .active-nav-tab {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 4px 14px -2px rgba(234, 88, 12, 0.38);
+    }
+    .inactive-nav-tab {
+      background-color: rgba(255, 255, 255, 0.65);
+      color: #786c65;
+      font-weight: 600;
+    }
+    .inactive-nav-tab:hover {
+      background-color: #ffffff;
+      color: #292320;
+    }
+    .active-tab {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 4px 12px -2px rgba(234, 88, 12, 0.3);
+    }
+    .inactive-tab {
+      background-color: rgba(255, 255, 255, 0.6);
+      color: #786c65;
+    }
+    .inactive-tab:hover {
+      background-color: #ffffff;
+      color: #292320;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#f7ebe3] relative overflow-x-hidden">
+
+  <!-- Ambient Glow Background Circles (Login page match) -->
+  <div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#fdd8c5]/40 blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-[#fae1d2]/50 blur-3xl"></div>
+  </div>
+
+  <!-- Mobile Backdrop -->
+  <div id="sidebar-backdrop" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0" onclick="toggleNavDrawer()"></div>
+
+  <!-- Collapsible Navigation Drawer -->
+  <aside id="nav-drawer" class="fixed left-0 top-0 h-full w-64 bg-white/95 backdrop-blur-md shadow-2xl z-50 flex flex-col justify-between -translate-x-full transition-transform duration-300 ease-in-out border-r border-[#fae1d2]">
+    <div class="flex flex-col flex-1">
+      <div class="h-16 px-4 flex items-center justify-between border-b border-[#fae1d2]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">school</span>
+          </div>
+          <div>
+            <div class="font-bold text-sm text-[#292320] tracking-tight">EDUVANCE</div>
+            <div class="text-[11px] text-[#786c65]">Student Workspace</div>
+          </div>
+        </div>
+        <button onclick="toggleNavDrawer()" class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-stone-100 transition-colors" title="Close">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <div class="px-4 py-2">
+        <span class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Navigation</span>
+      </div>
+
+      <nav class="flex-1 px-3 space-y-1">
+        <button onclick="switchStudentView('overview')" id="snav-overview" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-600 text-white text-left shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">grid_view</span>
+          <span>1. Overview</span>
+        </button>
+        <button onclick="switchStudentView('progress')" id="snav-progress" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <span class="material-symbols-outlined text-[18px]">monitoring</span>
+          <span>2. Academic Progress</span>
+        </button>
+        <button onclick="switchStudentView('subjects')" id="snav-subjects" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+          <span>3. My Subjects</span>
+        </button>
+        <button onclick="switchStudentView('tasks')" id="snav-tasks" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-[18px]">task_alt</span>
+            <span>4. My Tasks</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-bold" id="drawer-tasks-count">--</span>
+        </button>
+        <button onclick="switchStudentView('habits')" id="snav-habits" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white text-left transition-colors">
+          <span class="material-symbols-outlined text-[18px]">local_fire_department</span>
+          <span>5. Habits & Streaks</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Student Profile Footer -->
+    <div class="p-3 m-3 bg-[#faeee5] rounded-2xl flex items-center justify-between border border-[#eddcd2]">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white text-xs font-bold shadow-sm" id="drawer-initials">
+          AS
+        </div>
+        <div class="min-w-0">
+          <div class="text-xs font-bold text-[#292320] truncate" id="drawer-student-name">Aarav Sharma</div>
+          <div class="text-[10px] text-stone-500 truncate" id="drawer-reg-number">Reg: 12511001</div>
+        </div>
+      </div>
+      <button onclick="logout()" class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Logout">
+        <span class="material-symbols-outlined text-[18px]">logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Top Fixed App Header -->
+  <header class="fixed top-0 left-0 right-0 h-16 bg-[#f7ebe3]/90 backdrop-blur-md border-b border-[#fae1d2] z-30 flex items-center justify-between px-4 sm:px-6">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleNavDrawer()" class="w-9 h-9 rounded-xl flex items-center justify-center text-stone-600 hover:bg-white/80 transition-colors" aria-label="Toggle Navigation">
+        <span class="material-symbols-outlined text-[22px]">menu</span>
+      </button>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-black text-xs shadow-sm">
+          ED
+        </div>
+        <span class="font-extrabold text-sm text-[#292320] tracking-tight hidden sm:inline">Student Workspace</span>
+        <span class="text-stone-300 hidden sm:inline">|</span>
+        <span class="text-xs text-stone-500 font-medium hidden md:inline" id="header-context-tag">Semester 4 • Week 6</span>
+      </div>
+    </div>
+
+    <!-- Top 5 Navigation Group Tabs -->
+    <div class="hidden md:flex items-center gap-1.5 bg-white/70 p-1 rounded-2xl border border-white/80 text-xs shadow-sm">
+      <button onclick="switchStudentView('overview')" id="tnav-overview" class="px-3.5 py-1.5 rounded-xl active-nav-tab transition-all">Overview</button>
+      <button onclick="switchStudentView('progress')" id="tnav-progress" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all">Progress</button>
+      <button onclick="switchStudentView('subjects')" id="tnav-subjects" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all">Subjects</button>
+      <button onclick="switchStudentView('tasks')" id="tnav-tasks" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all">Tasks</button>
+      <button onclick="switchStudentView('habits')" id="tnav-habits" class="px-3.5 py-1.5 rounded-xl inactive-nav-tab transition-all">Habits 🔥</button>
+    </div>
+
+    <!-- Action & Avatar -->
+    <div class="flex items-center gap-2.5">
+      <button onclick="openAddTaskModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold shadow-[0_8px_20px_-4px_rgba(234,88,12,0.4)] transition-all">
+        <span class="material-symbols-outlined text-[16px]">add</span>
+        <span class="hidden sm:inline">New Task</span>
+      </button>
+      <div class="h-6 w-px bg-[#eddcd2]"></div>
+      <div class="w-8 h-8 rounded-full bg-white border border-[#eddcd2] flex items-center justify-center text-orange-600 font-bold text-xs shadow-sm" id="header-avatar">
+        AS
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container (5 Views) -->
+  <main class="relative z-10 pt-20 pb-16 px-4 sm:px-6 max-w-7xl mx-auto space-y-5">
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 1: OVERVIEW -->
+    <!-- ========================================================================= -->
+    <div id="view-overview" class="space-y-5">
+      
+      <!-- Greeting & Status Banner -->
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <h1 class="text-xl sm:text-2xl font-extrabold text-[#292320] tracking-tight" id="student-greeting">Good morning, Aarav</h1>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-sm" id="academic-status-pill">
+              <span class="w-2 h-2 rounded-full animate-pulse" id="status-pulse-dot"></span>
+              <span id="academic-status-text">WATCH STATUS</span>
+            </span>
+            <span class="text-xs text-stone-500 font-medium px-2 py-0.5 rounded-full bg-white/70 border border-[#eddcd2]" id="cohort-tag">Section K3P25IL • Semester 4</span>
+          </div>
+          <p class="text-xs sm:text-sm text-stone-600" id="status-summary-desc">
+            Track daily study rhythm and complete recovery tasks to stay on track.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 self-start md:self-auto flex-shrink-0">
+          <button onclick="switchStudentView('tasks')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors">
+            <span class="material-symbols-outlined text-[16px]">task_alt</span>
+            <span>View Tasks</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- FIRST-SCREEN HIGHLIGHT: COMPACT MONTHLY STREAK & TODAY'S HABITS -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left: Compact Monthly Consistency Matrix -->
+        <div class="lg:col-span-7 glass-card rounded-[26px] p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-[#fae1d2] gap-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-orange-500 text-[20px]">local_fire_department</span>
+                <h2 class="text-xs font-bold text-[#292320] uppercase tracking-wider">Consistency</h2>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100/70 text-orange-800" id="current-month-badge">November 2026</span>
+              </div>
+
+              <!-- Compact Legend -->
+              <div class="flex items-center gap-1 text-[10px] text-stone-500">
+                <span>0</span>
+                <span class="w-2.5 h-2.5 rounded-sm bg-stone-200"></span>
+                <span class="w-2.5 h-2.5 rounded-sm bg-orange-200"></span>
+                <span class="w-2.5 h-2.5 rounded-sm bg-orange-400"></span>
+                <span class="w-2.5 h-2.5 rounded-sm bg-orange-600"></span>
+                <span>4</span>
+              </div>
+            </div>
+
+            <!-- 4 Minimal Metric Pills -->
+            <div class="grid grid-cols-4 gap-2 my-3">
+              <div class="bg-orange-50/70 border border-orange-200/50 rounded-2xl p-2.5 text-center">
+                <div class="text-[10px] font-bold text-orange-700 uppercase">Streak</div>
+                <div class="text-lg font-extrabold text-orange-950 mt-0.5 flex items-center justify-center gap-0.5">
+                  <span id="streak-count-val">0</span>
+                  <span class="text-xs">🔥</span>
+                </div>
+                <div class="text-[9px] text-orange-600 font-medium">Days active</div>
+              </div>
+
+              <div class="bg-amber-50/70 border border-amber-200/50 rounded-2xl p-2.5 text-center">
+                <div class="text-[10px] font-bold text-amber-700 uppercase">Record</div>
+                <div class="text-lg font-extrabold text-amber-950 mt-0.5" id="best-streak-val">0</div>
+                <div class="text-[9px] text-amber-600 font-medium">Personal best</div>
+              </div>
+
+              <div class="bg-emerald-50/70 border border-emerald-200/50 rounded-2xl p-2.5 text-center">
+                <div class="text-[10px] font-bold text-emerald-700 uppercase">Monthly</div>
+                <div class="text-lg font-extrabold text-emerald-950 mt-0.5" id="monthly-rate-val">0%</div>
+                <div class="text-[9px] text-emerald-600 font-medium" id="monthly-active-days">0 active days</div>
+              </div>
+
+              <div class="bg-stone-50 border border-stone-200/60 rounded-2xl p-2.5 text-center">
+                <div class="text-[10px] font-bold text-stone-600 uppercase">Today</div>
+                <div class="text-lg font-extrabold text-stone-900 mt-0.5" id="today-habits-val">0 / 4</div>
+                <div class="text-[9px] text-stone-500 font-medium">Done</div>
+              </div>
+            </div>
+
+            <!-- Month Matrix Grid -->
+            <div class="relative overflow-x-auto py-1">
+              <div class="flex items-start gap-2 select-none">
+                <div class="flex flex-col justify-between text-[10px] text-stone-400 font-mono h-[112px] py-0.5 pr-1 text-right">
+                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+                <div id="monthly-matrix-grid" class="grid grid-flow-col grid-rows-7 gap-1.5 flex-1">
+                  <!-- Injected via JS -->
+                </div>
+              </div>
+              <div id="month-tooltip" class="fixed pointer-events-none z-50 hidden px-2.5 py-1.5 rounded-lg bg-stone-900 text-white text-xs shadow-xl border border-stone-700 max-w-xs transition-opacity duration-150"></div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-[#fae1d2] flex items-center justify-between text-[11px] text-stone-500">
+            <span class="flex items-center gap-1.5 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Consistent rhythm preserves academic retention</span>
+            </span>
+            <span class="font-semibold text-stone-500" id="calendar-today-indicator">Today: Nov 10, 2026</span>
+          </div>
+        </div>
+
+        <!-- Right: Today's Daily Habits -->
+        <div class="lg:col-span-5 glass-card rounded-[26px] p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-[#fae1d2]">
+              <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-orange-600 text-[18px]">checklist</span>
+                <h2 class="text-xs font-bold text-[#292320] uppercase tracking-wider">Today's Habits</h2>
+              </div>
+              <span class="text-[10px] font-bold text-emerald-800 bg-emerald-100/70 border border-emerald-200 px-2.5 py-0.5 rounded-full" id="habits-progress-pill">
+                0 / 4 Done
+              </span>
+            </div>
+
+            <div class="space-y-2 mt-3" id="habits-list-container">
+              <!-- Habit 1 -->
+              <div class="p-3 rounded-2xl border border-[#eddcd2] hover:border-orange-300 bg-white/90 transition-all flex items-center gap-3 cursor-pointer" onclick="toggleHabitCheck('notes')">
+                <input type="checkbox" id="habit-notes" class="w-4 h-4 rounded text-orange-600 focus:ring-0 cursor-pointer pointer-events-none">
+                <div class="flex-1 flex items-center justify-between min-w-0">
+                  <span class="text-xs font-bold text-[#292320]" id="habit-title-notes">Review lecture notes</span>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">30m</span>
+                </div>
+              </div>
+
+              <!-- Habit 2 -->
+              <div class="p-3 rounded-2xl border border-[#eddcd2] hover:border-orange-300 bg-white/90 transition-all flex items-center gap-3 cursor-pointer" onclick="toggleHabitCheck('practice')">
+                <input type="checkbox" id="habit-practice" class="w-4 h-4 rounded text-orange-600 focus:ring-0 cursor-pointer pointer-events-none">
+                <div class="flex-1 flex items-center justify-between min-w-0">
+                  <span class="text-xs font-bold text-[#292320]" id="habit-title-practice">Solve 3 practice problems</span>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">45m</span>
+                </div>
+              </div>
+
+              <!-- Habit 3 -->
+              <div class="p-3 rounded-2xl border border-[#eddcd2] hover:border-orange-300 bg-white/90 transition-all flex items-center gap-3 cursor-pointer" onclick="toggleHabitCheck('assignments')">
+                <input type="checkbox" id="habit-assignments" class="w-4 h-4 rounded text-orange-600 focus:ring-0 cursor-pointer pointer-events-none">
+                <div class="flex-1 flex items-center justify-between min-w-0">
+                  <span class="text-xs font-bold text-[#292320]" id="habit-title-assignments">Check pending assignments</span>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">30m</span>
+                </div>
+              </div>
+
+              <!-- Habit 4 -->
+              <div class="p-3 rounded-2xl border border-[#eddcd2] hover:border-orange-300 bg-white/90 transition-all flex items-center gap-3 cursor-pointer" onclick="toggleHabitCheck('concept')">
+                <input type="checkbox" id="habit-concept" class="w-4 h-4 rounded text-orange-600 focus:ring-0 cursor-pointer pointer-events-none">
+                <div class="flex-1 flex items-center justify-between min-w-0">
+                  <span class="text-xs font-bold text-[#292320]" id="habit-title-concept">Review weak concept</span>
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700">20m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-2 border-t border-[#fae1d2] text-[10px] text-stone-500 flex items-center justify-between">
+            <span>Check-ins persist locally</span>
+            <span class="font-medium text-orange-700">Daily Routine</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 4 Academic Health Summary Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1 -->
+        <div class="glass-card glass-card-hover rounded-[24px] p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-400">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Academic Standing</span>
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+          </div>
+          <div class="my-2">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-sm" id="card-status-badge">
+              <span class="w-2 h-2 rounded-full" id="card-status-dot"></span>
+              <span id="card-status-text">WATCH</span>
+            </div>
+            <div class="text-xs text-stone-600 mt-1.5 font-medium" id="card-status-subtitle">
+              Attention needed in MTH401
+            </div>
+          </div>
+          <div class="text-[10px] text-stone-400">Ensemble Early-Warning Model</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass-card glass-card-hover rounded-[24px] p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-400">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Semester Average</span>
+            <span class="material-symbols-outlined text-[18px]">school</span>
+          </div>
+          <div class="my-2">
+            <div class="flex items-baseline gap-1">
+              <span class="text-3xl font-black text-[#292320]" id="kpi-sem-avg">7.4</span>
+              <span class="text-xs font-semibold text-stone-400">/ 10</span>
+            </div>
+            <div class="text-xs text-emerald-700 font-bold mt-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span>
+              <span id="kpi-cgpa-info">Cumulative GPA: 7.62</span>
+            </div>
+          </div>
+          <div class="text-[10px] text-stone-400">Benchmark: 6.00</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass-card glass-card-hover rounded-[24px] p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-400">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Aggregate Attendance</span>
+            <span class="material-symbols-outlined text-[18px]">co_present</span>
+          </div>
+          <div class="my-2">
+            <div class="flex items-baseline justify-between">
+              <span class="text-3xl font-black text-[#292320]" id="kpi-att-pct">82.0%</span>
+              <span class="text-xs font-bold text-stone-500">Goal: 85%</span>
+            </div>
+            <div class="w-full bg-stone-200/60 h-2 rounded-full overflow-hidden mt-2">
+              <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" id="kpi-att-bar" style="width: 82%"></div>
+            </div>
+          </div>
+          <div class="text-[11px] text-amber-800 font-semibold flex items-center gap-1" id="kpi-att-safe">
+            <span class="material-symbols-outlined text-[14px]">alarm</span>
+            <span>3 classes to safe threshold</span>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="glass-card glass-card-hover rounded-[24px] p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-400">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500">Assignment Completion</span>
+            <span class="material-symbols-outlined text-[18px]">fact_check</span>
+          </div>
+          <div class="my-2">
+            <div class="flex items-baseline justify-between">
+              <span class="text-3xl font-black text-[#292320]" id="kpi-asgn-pct">76%</span>
+              <span class="text-xs font-bold text-stone-500" id="kpi-asgn-ratio">19 / 25 Done</span>
+            </div>
+            <div class="w-full bg-stone-200/60 h-2 rounded-full overflow-hidden mt-2">
+              <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500" id="kpi-asgn-bar" style="width: 76%"></div>
+            </div>
+          </div>
+          <div class="text-[11px] text-stone-600 font-medium" id="kpi-asgn-breakdown">
+            <span class="text-emerald-700 font-bold">19 Completed</span> • <span class="text-amber-700 font-bold">6 Pending</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Urgent Pending Tasks Quick Preview -->
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-[#fae1d2]">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-orange-600 text-[20px]">assignment_late</span>
+            <h3 class="text-xs font-bold text-[#292320] uppercase tracking-wider">High-Priority Study Tasks</h3>
+          </div>
+          <button onclick="switchStudentView('tasks')" class="text-xs font-bold text-orange-600 hover:text-orange-700">View All →</button>
+        </div>
+        <div id="overview-tasks-preview" class="space-y-2">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 2: ACADEMIC PROGRESS -->
+    <!-- ========================================================================= -->
+    <div id="view-progress" class="hidden space-y-5">
+      
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#fae1d2] gap-2">
+          <div>
+            <h2 class="text-base font-bold text-[#292320]">Academic Trajectory</h2>
+            <p class="text-xs text-stone-500">Weekly evaluation scores and lecture attendance trajectory.</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-semibold text-stone-600">
+            <div class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-sm bg-orange-500"></span><span>Score</span></div>
+            <div class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-sm bg-emerald-600"></span><span>Attendance</span></div>
+          </div>
+        </div>
+
+        <div class="relative w-full h-[280px]">
+          <canvas id="academicProgressChart"></canvas>
+        </div>
+
+        <div class="pt-3 border-t border-[#fae1d2] flex items-center justify-between text-xs text-stone-500">
+          <span>Solid: Observed (W1–W6) • Dashed: Projected (W7–W8)</span>
+          <span class="font-bold text-orange-700">Goal: &gt; 75% Clearance</span>
+        </div>
+      </section>
+
+      <!-- Why Watch Status & Recovery Plan -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="glass-card rounded-[26px] p-5 space-y-3">
+          <div class="flex items-center gap-2 pb-2 border-b border-[#fae1d2]">
+            <span class="material-symbols-outlined text-amber-600 text-[22px]">psychology</span>
+            <div>
+              <h3 class="text-xs font-bold text-[#292320] uppercase tracking-wider">Status Drivers</h3>
+              <p class="text-xs text-stone-500">Primary model triggers for your current standing.</p>
+            </div>
+          </div>
+          <div class="space-y-2 pt-1 text-xs">
+            <div class="p-3 bg-amber-50/70 border border-amber-200/60 rounded-2xl">
+              <span class="font-bold text-amber-900 block">MTH401 Assessment Dip</span>
+              <p class="text-amber-800 mt-0.5">Discrete Mathematics internal score dropped from 74% to 64% in Week 5.</p>
+            </div>
+            <div class="p-3 bg-stone-50 border border-stone-200/80 rounded-2xl">
+              <span class="font-bold text-stone-800 block">Assignment Lag</span>
+              <p class="text-stone-600 mt-0.5">6 pending assignments. Submission unlocks continuous evaluation points.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-[26px] p-5 space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 pb-2 border-b border-[#fae1d2]">
+              <span class="material-symbols-outlined text-emerald-600 text-[22px]">moving</span>
+              <div>
+                <h3 class="text-xs font-bold text-[#292320] uppercase tracking-wider">Recovery Actions</h3>
+                <p class="text-xs text-stone-500">Recommended steps to return to Good Standing.</p>
+              </div>
+            </div>
+            <div class="space-y-2 pt-2 text-xs">
+              <div class="p-3 bg-emerald-50/60 border border-emerald-200/60 rounded-2xl flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+                <span>Solve MTH401 Discrete Math Unit 3 practice problems.</span>
+              </div>
+              <div class="p-3 bg-stone-50 border border-stone-200/80 rounded-2xl flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-stone-800 text-white flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+                <span>Attend next 3 consecutive lectures to cross 85% attendance.</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 bg-orange-50/70 border border-orange-200/60 rounded-2xl text-xs text-orange-900 font-semibold flex items-center justify-between">
+            <span>Timeline: 10–14 days</span>
+            <span class="font-bold text-emerald-700">+8% projected lift</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 3: MY SUBJECTS -->
+    <!-- ========================================================================= -->
+    <div id="view-subjects" class="hidden space-y-5">
+      
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#fae1d2]">
+          <div>
+            <h2 class="text-base font-bold text-[#292320]">Courses & Attendance</h2>
+            <p class="text-xs text-stone-500">Subject internal scores, attendance, and clearance status.</p>
+          </div>
+          <span class="text-xs font-bold text-orange-800 bg-orange-100/70 border border-orange-200/80 px-3 py-1 rounded-full">75% Institutional Cutoff</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1" id="full-subjects-grid">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 4: MY TASKS -->
+    <!-- ========================================================================= -->
+    <div id="view-tasks" class="hidden space-y-5">
+      
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#fae1d2]">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-orange-600 text-[22px]">assignment</span>
+              <h2 class="text-base font-bold text-[#292320]">Task Workspace</h2>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/80 border border-[#eddcd2] text-stone-700" id="task-total-count">0 tasks</span>
+            </div>
+            <p class="text-xs text-stone-500 mt-0.5">Manage study items and mentor recovery tasks.</p>
+          </div>
+
+          <button onclick="openAddTaskModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[16px]">add_circle</span>
+            <span>Add Task</span>
+          </button>
+        </div>
+
+        <!-- 5 Filter Tabs -->
+        <div class="flex flex-wrap items-center gap-1.5 border-b border-[#fae1d2] pb-2 text-xs font-medium">
+          <button onclick="switchTaskFilter('all')" id="tab-all" class="px-3.5 py-1.5 rounded-xl active-tab transition-colors flex items-center gap-1.5">
+            <span>All Tasks</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20" id="count-tab-all">0</span>
+          </button>
+          <button onclick="switchTaskFilter('my_tasks')" id="tab-my_tasks" class="px-3.5 py-1.5 rounded-xl inactive-tab transition-colors flex items-center gap-1.5">
+            <span>My Tasks</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-stone-200" id="count-tab-my_tasks">0</span>
+          </button>
+          <button onclick="switchTaskFilter('mentor_assigned')" id="tab-mentor_assigned" class="px-3.5 py-1.5 rounded-xl inactive-tab transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[14px] text-amber-600">supervisor_account</span>
+            <span>Mentor Assigned</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-stone-200" id="count-tab-mentor_assigned">0</span>
+          </button>
+          <button onclick="switchTaskFilter('completed')" id="tab-completed" class="px-3.5 py-1.5 rounded-xl inactive-tab transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[14px] text-emerald-600">check_circle</span>
+            <span>Completed</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-stone-200" id="count-tab-completed">0</span>
+          </button>
+          <button onclick="switchTaskFilter('overdue')" id="tab-overdue" class="px-3.5 py-1.5 rounded-xl inactive-tab transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[14px] text-red-600">alarm_off</span>
+            <span>Overdue</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-stone-200" id="count-tab-overdue">0</span>
+          </button>
+        </div>
+
+        <!-- Task List Feed -->
+        <div id="tasks-list" class="space-y-2.5">
+          <div class="py-8 text-center text-slate-400 text-xs">Loading tasks...</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- VIEW 5: HABITS & CONSISTENCY -->
+    <!-- ========================================================================= -->
+    <div id="view-habits" class="hidden space-y-5">
+      
+      <section class="glass-card rounded-[26px] p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#fae1d2]">
+          <div>
+            <h2 class="text-base font-bold text-[#292320] flex items-center gap-2">
+              <span class="material-symbols-outlined text-orange-500 text-[22px]">local_fire_department</span>
+              <span>Daily Academic Habit Tracker</span>
+            </h2>
+            <p class="text-xs text-stone-500">Build cognitive momentum and maintain your learning streak.</p>
+          </div>
+          <span class="text-xs font-bold px-3 py-1 bg-orange-50 text-orange-900 border border-orange-200/80 rounded-full">
+            Active Streak: <strong id="habits-view-streak">0 Days</strong> 🔥
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="habits-full-checklist">
+          <!-- Checkboxes rendered via JS -->
+        </div>
+
+        <div class="p-3.5 bg-orange-50/60 rounded-2xl border border-orange-200/60 text-xs text-stone-700 leading-relaxed flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-[18px] text-orange-600 shrink-0">verified</span>
+          <span>Consistent daily habits significantly improve semester retention. Check-ins persist across sessions.</span>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ADD TASK MODAL -->
+  <div id="add-task-modal" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white/95 backdrop-blur-md rounded-[28px] max-w-lg w-full p-6 shadow-2xl border border-white/80 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-[#fae1d2]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">add_task</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-[#292320]">Add Personal Study Task</h3>
+            <p class="text-xs text-stone-500">Track syllabus review or coding tasks.</p>
+          </div>
+        </div>
+        <button onclick="closeAddTaskModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-stone-100 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <form id="add-task-form" onsubmit="submitNewTask(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Subject Code</label>
+          <select id="task-course" class="w-full text-xs p-2.5 rounded-xl border border-[#eddcd2] focus:outline-none focus:border-orange-500 bg-white">
+            <option value="MTH401">MTH401 — Discrete Mathematics</option>
+            <option value="CSE202">CSE202 — Object Oriented Programming</option>
+            <option value="CSE205">CSE205 — Data Structures & Algorithms</option>
+            <option value="CSE310">CSE310 — Database Management Systems</option>
+            <option value="CSE320">CSE320 — Computer Networks</option>
+            <option value="INT404">INT404 — Artificial Intelligence</option>
+            <option value="GEN">General / Self-Study</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Task Title <span class="text-red-500">*</span></label>
+          <input type="text" id="task-title" required placeholder="e.g. Practice Graph BFS and DFS problems" class="w-full text-xs p-2.5 rounded-xl border border-[#eddcd2] focus:outline-none focus:border-orange-500 bg-white">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Instructions / Description</label>
+          <textarea id="task-desc" rows="2" placeholder="Add specific notes, textbook page numbers..." class="w-full text-xs p-2.5 rounded-xl border border-[#eddcd2] focus:outline-none focus:border-orange-500 bg-white"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Priority</label>
+            <select id="task-priority" class="w-full text-xs p-2.5 rounded-xl border border-[#eddcd2] focus:outline-none focus:border-orange-500 bg-white">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Due Date</label>
+            <input type="date" id="task-due" class="w-full text-xs p-2.5 rounded-xl border border-[#eddcd2] focus:outline-none focus:border-orange-500 bg-white">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-[#fae1d2] flex items-center justify-end gap-2">
+          <button type="button" onclick="closeAddTaskModal()" class="px-3.5 py-2 rounded-xl border border-[#eddcd2] text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors">
+            Cancel
+          </button>
+          <button type="submit" id="submit-task-btn" class="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Create Task</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    const isFile = window.location.protocol === 'file:';
+    const API_BASE = isFile ? 'http://127.0.0.1:8000' : '';
+    let token = localStorage.getItem('token') || '';
+    let currentUser = null;
+    let dashboardData = null;
+    let currentTaskFilter = 'all';
+    let progressChartInstance = null;
+
+    // View Switching
+    function switchStudentView(viewName) {
+      const views = ['overview', 'progress', 'subjects', 'tasks', 'habits'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) {
+          if (v === viewName) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+
+        const tbtn = document.getElementById(`tnav-${v}`);
+        if (tbtn) {
+          tbtn.className = (v === viewName) 
+            ? 'px-3 py-1.5 rounded-lg active-nav-tab transition-all'
+            : 'px-3 py-1.5 rounded-lg inactive-nav-tab transition-all';
+        }
+
+        const sbtn = document.getElementById(`snav-${v}`);
+        if (sbtn) {
+          sbtn.className = (v === viewName)
+            ? 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium bg-primary text-white text-left transition-colors'
+            : 'w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 text-left transition-colors';
+        }
+      });
+    }
+
+    function toggleNavDrawer() {
+      const drawer = document.getElementById('nav-drawer');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!drawer || !backdrop) return;
+      const isOpen = !drawer.classList.contains('-translate-x-full');
+      if (isOpen) {
+        drawer.classList.add('-translate-x-full');
+        backdrop.classList.add('opacity-0');
+        setTimeout(() => backdrop.classList.add('hidden'), 300);
+      } else {
+        backdrop.classList.remove('hidden');
+        setTimeout(() => {
+          backdrop.classList.remove('opacity-0');
+          drawer.classList.remove('-translate-x-full');
+        }, 10);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = isFile ? 'login.html' : '/login';
+    }
+
+    // Auth Session
+    async function ensureStudentSession() {
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            currentUser = await res.json();
+            if (currentUser.role === 'student' || currentUser.role === 'admin') return;
+          }
+        } catch (e) {
+          console.warn('Session verification fallback', e);
+        }
+      }
+
+      try {
+        const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: '12511001', password: 'demo123' })
+        });
+        if (loginRes.ok) {
+          const data = await loginRes.json();
+          token = data.access_token;
+          currentUser = data.user;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(currentUser));
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+      }
+    }
+
+    // Monthly Habit Engine
+    class MonthlyHabitTracker {
+      constructor(registrationNumber) {
+        this.storageKey = `lpu_habits_month_${registrationNumber || '12511001'}`;
+        this.history = this.loadHistory();
+      }
+
+      loadHistory() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+          return {};
+        }
+      }
+
+      saveHistory() {
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.history));
+        } catch (e) {
+          console.warn('Storage save failed', e);
+        }
+      }
+
+      getTodayKey() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }
+
+      getTodayHabits() {
+        const key = this.getTodayKey();
+        return this.history[key]?.completed || [];
+      }
+
+      toggleHabit(habitId) {
+        const key = this.getTodayKey();
+        if (!this.history[key]) {
+          this.history[key] = { date: key, completed: [], count: 0 };
+        }
+        const set = new Set(this.history[key].completed);
+        if (set.has(habitId)) {
+          set.delete(habitId);
+        } else {
+          set.add(habitId);
+        }
+        this.history[key].completed = Array.from(set);
+        this.history[key].count = this.history[key].completed.length;
+        this.saveHistory();
+        return this.history[key].completed;
+      }
+
+      calculateStats() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let currentStreak = 0;
+        const todayKey = this.getTodayKey();
+        const todayActive = (this.history[todayKey]?.count || 0) > 0;
+        
+        let cursor = new Date(today);
+        if (!todayActive) {
+          cursor.setDate(cursor.getDate() - 1);
+        }
+        while (true) {
+          const k = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`;
+          if (this.history[k]?.count > 0) {
+            currentStreak++;
+            cursor.setDate(cursor.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+
+        const sortedKeys = Object.keys(this.history).sort();
+        let bestStreak = 0;
+        let tempStreak = 0;
+        sortedKeys.forEach(k => {
+          if (this.history[k]?.count > 0) {
+            tempStreak++;
+            if (tempStreak > bestStreak) bestStreak = tempStreak;
+          } else {
+            tempStreak = 0;
+          }
+        });
+        if (currentStreak > bestStreak) bestStreak = currentStreak;
+
+        let monthActive = 0;
+        const currentDayOfMonth = today.getDate();
+        for (let day = 1; day <= daysInMonth; day++) {
+          const k = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          if (this.history[k]?.count > 0) {
+            monthActive++;
+          }
+        }
+        const monthRate = currentDayOfMonth > 0 ? Math.round((monthActive / currentDayOfMonth) * 100) : 0;
+
+        return {
+          currentStreak,
+          bestStreak,
+          monthActive,
+          monthRate,
+          todayCount: this.history[todayKey]?.count || 0
+        };
+      }
+
+      getMonthMatrix() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const firstDayWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+        const totalWeeks = Math.ceil((firstDayWeekday + daysInMonth) / 7);
+
+        const matrix = [];
+        for (let w = 0; w < totalWeeks; w++) {
+          for (let d = 0; d < 7; d++) {
+            const dayNum = w * 7 + d - firstDayWeekday + 1;
+            if (dayNum >= 1 && dayNum <= daysInMonth) {
+              const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+              const dateObj = new Date(year, month, dayNum);
+              const isToday = (dayNum === today.getDate());
+              const isFuture = (dateObj > today);
+              const entry = this.history[dateStr] || { count: 0, completed: [] };
+
+              matrix.push({
+                dayNum,
+                dateStr,
+                dateObj,
+                count: isFuture ? 0 : entry.count,
+                completed: entry.completed,
+                isToday,
+                isFuture,
+                valid: true
+              });
+            } else {
+              matrix.push({ valid: false });
+            }
+          }
+        }
+        return { matrix, totalWeeks };
+      }
+    }
+
+    let habitTracker = null;
+
+    function renderHabitsUI() {
+      if (!habitTracker) return;
+      const stats = habitTracker.calculateStats();
+      const todayHabits = habitTracker.getTodayHabits();
+
+      document.getElementById('streak-count-val').textContent = stats.currentStreak;
+      document.getElementById('best-streak-val').textContent = stats.bestStreak;
+      document.getElementById('monthly-rate-val').textContent = stats.monthRate + '%';
+      document.getElementById('monthly-active-days').textContent = `${stats.monthActive} active days`;
+      document.getElementById('today-habits-val').textContent = `${stats.todayCount} / 4`;
+      document.getElementById('habits-progress-pill').textContent = `${stats.todayCount} / 4 Done`;
+      document.getElementById('habits-view-streak').textContent = `${stats.currentStreak} Days`;
+
+      const habitKeys = ['notes', 'practice', 'assignments', 'concept'];
+      habitKeys.forEach(k => {
+        const isChecked = todayHabits.includes(k);
+        const el = document.getElementById(`habit-${k}`);
+        if (el) el.checked = isChecked;
+        const titleEl = document.getElementById(`habit-title-${k}`);
+        if (titleEl) {
+          if (isChecked) {
+            titleEl.classList.add('line-through', 'text-slate-400');
+          } else {
+            titleEl.classList.remove('line-through', 'text-slate-400');
+          }
+        }
+      });
+
+      const today = new Date();
+      const monthName = today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      document.getElementById('current-month-badge').textContent = monthName;
+      document.getElementById('calendar-today-indicator').textContent = 'Today: ' + today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+      const container = document.getElementById('monthly-matrix-grid');
+      const { matrix, totalWeeks } = habitTracker.getMonthMatrix();
+      container.style.gridTemplateColumns = `repeat(${totalWeeks}, minmax(0, 1fr))`;
+
+      container.innerHTML = matrix.map(cell => {
+        if (!cell.valid) {
+          return `<div class="w-3.5 h-3.5 rounded-sm bg-transparent pointer-events-none"></div>`;
+        }
+
+        let bgClass = 'bg-slate-100 border-slate-200';
+        if (cell.isFuture) {
+          bgClass = 'bg-slate-50 border-dashed border-slate-200 opacity-40';
+        } else if (cell.count === 1) {
+          bgClass = 'bg-emerald-200 border-emerald-300';
+        } else if (cell.count === 2) {
+          bgClass = 'bg-emerald-300 border-emerald-400';
+        } else if (cell.count === 3) {
+          bgClass = 'bg-emerald-500 border-emerald-600';
+        } else if (cell.count >= 4) {
+          bgClass = 'bg-emerald-700 border-emerald-800';
+        }
+
+        const ringClass = cell.isToday ? 'ring-2 ring-primary ring-offset-1 font-bold' : '';
+
+        return `
+          <div class="w-3.5 h-3.5 rounded-sm border ${bgClass} ${ringClass} cursor-pointer transition-transform hover:scale-125"
+               onmouseenter="showMonthTooltip(event, '${cell.dateStr}', ${cell.count}, ${cell.isToday}, ${cell.isFuture})"
+               onmouseleave="hideMonthTooltip()">
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleHabitCheck(habitId) {
+      if (!habitTracker) return;
+      habitTracker.toggleHabit(habitId);
+      renderHabitsUI();
+    }
+
+    function showMonthTooltip(e, dateStr, count, isToday, isFuture) {
+      const tip = document.getElementById('month-tooltip');
+      if (!tip) return;
+      const rect = e.target.getBoundingClientRect();
+      const statusLabel = isFuture ? 'Upcoming day' : `${count} of 4 habits completed`;
+      tip.innerHTML = `
+        <div class="font-bold text-[11px]">${dateStr} ${isToday ? '• Today' : ''}</div>
+        <div class="text-[10px] text-slate-300 mt-0.5">${statusLabel}</div>
+      `;
+      tip.classList.remove('hidden');
+      tip.style.top = `${rect.top - 46}px`;
+      tip.style.left = `${rect.left - 40}px`;
+    }
+
+    function hideMonthTooltip() {
+      const tip = document.getElementById('month-tooltip');
+      if (tip) tip.classList.add('hidden');
+    }
+
+    // Task Workspace Functions
+    async function loadTasks() {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/student/tasks?filter_type=${currentTaskFilter}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to fetch tasks');
+        const tasks = await res.json();
+        renderTasks(tasks);
+        updateTaskCounts();
+      } catch (err) {
+        console.error('Task load error:', err);
+      }
+    }
+
+    async function updateTaskCounts() {
+      try {
+        const filters = ['all', 'my_tasks', 'mentor_assigned', 'completed', 'overdue'];
+        for (const f of filters) {
+          const res = await fetch(`${API_BASE}/api/v1/student/tasks?filter_type=${f}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const list = await res.json();
+            const badge = document.getElementById(`count-tab-${f}`);
+            if (badge) badge.textContent = list.length;
+            if (f === 'all') {
+              const tot = document.getElementById('task-total-count');
+              if (tot) tot.textContent = `${list.length} tasks`;
+              document.getElementById('drawer-tasks-count').textContent = list.length;
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    function switchTaskFilter(filterName) {
+      currentTaskFilter = filterName;
+      const tabs = ['all', 'my_tasks', 'mentor_assigned', 'completed', 'overdue'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (!btn) return;
+        btn.className = (t === filterName)
+          ? 'px-3 py-1.5 rounded-lg active-tab transition-colors flex items-center gap-1.5'
+          : 'px-3 py-1.5 rounded-lg inactive-tab transition-colors flex items-center gap-1.5';
+      });
+      loadTasks();
+    }
+
+    function renderTasks(tasks) {
+      const container = document.getElementById('tasks-list');
+      const previewContainer = document.getElementById('overview-tasks-preview');
+      if (!container) return;
+
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="py-10 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <span class="material-symbols-outlined text-[32px] text-slate-300">task_alt</span>
+            <div class="text-xs font-semibold text-slate-600 mt-1">No tasks in this category</div>
+            <div class="text-[11px] text-slate-400">Add a personal study task or check back for mentor recommendations.</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Populate Overview preview
+      if (previewContainer) {
+        const pendingTasks = tasks.filter(t => t.status !== 'completed').slice(0, 3);
+        if (pendingTasks.length > 0) {
+          previewContainer.innerHTML = pendingTasks.map(t => `
+            <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">${t.course || 'ACAD'}</span>
+                <span class="text-xs font-bold text-slate-800">${t.title}</span>
+              </div>
+              <span class="text-[11px] text-slate-500">${t.due_label || 'Priority'}</span>
+            </div>
+          `).join('');
+        } else {
+          previewContainer.innerHTML = `<div class="p-3 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">All tasks completed! Great consistency.</div>`;
+        }
+      }
+
+      container.innerHTML = tasks.map(t => {
+        const isDone = (t.status === 'completed');
+        const isOverdue = (t.status === 'overdue');
+        const isMentor = (t.source === 'mentor');
+
+        let prioBadge = 'bg-blue-50 text-blue-700 border-blue-200';
+        if (t.priority === 'High') prioBadge = 'bg-red-50 text-red-700 border-red-200';
+        if (t.priority === 'Low') prioBadge = 'bg-slate-100 text-slate-600 border-slate-200';
+
+        const sourceBadge = isMentor 
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+               <span class="material-symbols-outlined text-[12px]">supervisor_account</span>
+               Mentor Assigned (${t.creator_name || 'Faculty'})
+             </span>`
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700">
+               <span class="material-symbols-outlined text-[12px]">person</span>
+               Personal Task
+             </span>`;
+
+        const actionButtons = isDone
+          ? `<button onclick="updateTaskStatus(${t.id}, 'pending')" class="px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Reopen</button>`
+          : `<button onclick="updateTaskStatus(${t.id}, 'completed')" class="px-2.5 py-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors flex items-center gap-1">
+               <span class="material-symbols-outlined text-[14px]">check</span>
+               <span>Mark Done</span>
+             </button>`;
+
+        const deleteButton = !isMentor
+          ? `<button onclick="deleteTask(${t.id})" class="p-1 text-slate-400 hover:text-red-600 rounded transition-colors" title="Delete personal task">
+               <span class="material-symbols-outlined text-[18px]">delete</span>
+             </button>`
+          : `<span class="text-[10px] text-slate-400 italic">Protected</span>`;
+
+        return `
+          <div class="p-4 rounded-xl border ${isDone ? 'bg-slate-50/60 border-slate-200 opacity-75' : (isOverdue ? 'bg-red-50/20 border-red-200' : 'bg-white border-slate-200')} hover:border-slate-300 transition-all space-y-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary uppercase">${t.course || 'ACADEMIC'}</span>
+                <span class="text-xs font-bold ${isDone ? 'line-through text-slate-400' : 'text-slate-800'}">${t.title}</span>
+                <span class="px-2 py-0.2 rounded text-[10px] font-semibold border ${prioBadge}">${t.priority || 'Medium'}</span>
+                ${sourceBadge}
+              </div>
+
+              <div class="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
+                <span class="text-[11px] font-medium ${isOverdue ? 'text-red-600 font-bold' : 'text-slate-500'} flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">${isOverdue ? 'alarm_off' : 'event'}</span>
+                  <span>${t.due_label || 'Due Soon'}</span>
+                </span>
+                ${actionButtons}
+                ${deleteButton}
+              </div>
+            </div>
+
+            ${t.description ? `<p class="text-xs text-slate-600 bg-slate-50/80 p-2.5 rounded-lg leading-relaxed">${t.description}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateTaskStatus(taskId, newStatus) {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/student/tasks/${taskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error('Status update failed');
+        loadTasks();
+      } catch (e) {
+        alert('Could not update task: ' + e.message);
+      }
+    }
+
+    async function deleteTask(taskId) {
+      if (!confirm('Are you sure you want to delete this personal task?')) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/student/tasks/${taskId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Delete failed');
+        }
+        loadTasks();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function openAddTaskModal() {
+      document.getElementById('add-task-modal').classList.remove('hidden');
+    }
+
+    function closeAddTaskModal() {
+      document.getElementById('add-task-modal').classList.add('hidden');
+    }
+
+    async function submitNewTask(e) {
+      e.preventDefault();
+      const course = document.getElementById('task-course').value;
+      const title = document.getElementById('task-title').value.trim();
+      const desc = document.getElementById('task-desc').value.trim();
+      const priority = document.getElementById('task-priority').value;
+      const dueDate = document.getElementById('task-due').value;
+
+      if (!title) return;
+
+      const payload = {
+        title: title,
+        description: desc || null,
+        course_code: course,
+        priority: priority,
+        due_date: dueDate ? new Date(dueDate).toISOString() : null
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/student/tasks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Failed to create task');
+        closeAddTaskModal();
+        document.getElementById('add-task-form').reset();
+        loadTasks();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Chart.js Progressive Rendering
+    function renderAcademicChart(weeklyTrends) {
+      const ctx = document.getElementById('academicProgressChart')?.getContext('2d');
+      if (!ctx || !weeklyTrends) return;
+
+      if (progressChartInstance) {
+        progressChartInstance.destroy();
+      }
+
+      const labels = weeklyTrends.map(w => `W${w.week_number}`);
+      const assessmentData = weeklyTrends.map(w => w.assessment_score);
+      const attendanceData = weeklyTrends.map(w => w.attendance_pct);
+      const isProjectedList = weeklyTrends.map(w => w.is_projected);
+      const splitIndex = isProjectedList.indexOf(true);
+
+      progressChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Assessment Score (%)',
+              data: assessmentData,
+              borderColor: '#296199',
+              backgroundColor: 'rgba(41, 97, 153, 0.08)',
+              borderWidth: 2.5,
+              tension: 0.3,
+              fill: true,
+              pointBackgroundColor: isProjectedList.map(p => p ? '#ffffff' : '#296199'),
+              pointBorderColor: '#296199',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              segment: {
+                borderDash: ctx => ctx.p0DataIndex >= (splitIndex - 1) ? [5, 5] : undefined
+              }
+            },
+            {
+              label: 'Attendance (%)',
+              data: attendanceData,
+              borderColor: '#059669',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              tension: 0.3,
+              pointBackgroundColor: isProjectedList.map(p => p ? '#ffffff' : '#059669'),
+              pointBorderColor: '#059669',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              segment: {
+                borderDash: ctx => ctx.p0DataIndex >= (splitIndex - 1) ? [5, 5] : undefined
+              }
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleFont: { family: 'Inter', size: 12, weight: 'bold' },
+              bodyFont: { family: 'Inter', size: 11 },
+              callbacks: {
+                label: function(context) {
+                  const isProj = isProjectedList[context.dataIndex];
+                  return `${context.dataset.label}: ${context.parsed.y}% ${isProj ? '(Projected)' : '(Observed)'}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: 40,
+              max: 100,
+              grid: { color: '#f1f5f9' },
+              ticks: { stepSize: 10, callback: v => v + '%', font: { family: 'Inter', size: 10 } }
+            },
+            x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // Populate Student Dashboard
+    async function loadStudentDashboard() {
+      await ensureStudentSession();
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/student/dashboard`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Dashboard fetch failed');
+        dashboardData = await res.json();
+        renderDashboardData(dashboardData);
+      } catch (err) {
+        console.error('Failed to load student dashboard:', err);
+      }
+    }
+
+    function renderDashboardData(data) {
+      if (!data) return;
+
+      const fullName = data.name || (currentUser && currentUser.full_name) || 'Aarav Sharma';
+      const firstName = fullName.split(' ')[0] || fullName;
+      const regNo = data.registration_number || (currentUser && currentUser.username) || '12511001';
+      const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AS';
+
+      document.getElementById('student-greeting').textContent = `Good morning, ${firstName}`;
+      document.getElementById('drawer-student-name').textContent = fullName;
+      document.getElementById('drawer-reg-number').textContent = `Reg: ${regNo}`;
+      document.getElementById('drawer-initials').textContent = initials;
+      document.getElementById('header-avatar').textContent = initials;
+      document.getElementById('cohort-tag').textContent = `Section ${data.section || 'K3P25IL'} • Semester 4`;
+
+      const status = data.kpi?.academic_status || 'ON TRACK';
+      const statusPill = document.getElementById('academic-status-pill');
+      const statusDot = document.getElementById('status-pulse-dot');
+      const statusText = document.getElementById('academic-status-text');
+
+      if (status === 'WATCH') {
+        statusPill.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200';
+        statusDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        statusText.textContent = 'WATCH STATUS';
+      } else if (status === 'NEEDS REVIEW') {
+        statusPill.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200';
+        statusDot.className = 'w-2 h-2 rounded-full bg-red-500 animate-pulse';
+        statusText.textContent = 'NEEDS REVIEW';
+      } else {
+        statusPill.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        statusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        statusText.textContent = 'GOOD STANDING';
+      }
+
+      document.getElementById('card-status-text').textContent = status;
+      document.getElementById('card-status-subtitle').textContent = data.kpi?.status_subtitle || 'Active academic monitoring';
+
+      document.getElementById('kpi-sem-avg').textContent = (data.kpi?.semester_average || 7.4).toFixed(1);
+      document.getElementById('kpi-cgpa-info').textContent = `Cumulative GPA: ${(data.kpi?.cgpa || 7.62).toFixed(2)}`;
+
+      const attPct = data.kpi?.attendance_percentage || 82.0;
+      document.getElementById('kpi-att-pct').textContent = attPct.toFixed(1) + '%';
+      document.getElementById('kpi-att-bar').style.width = Math.min(100, attPct) + '%';
+      const safeCls = data.kpi?.classes_to_safe || 3;
+      document.getElementById('kpi-att-safe').innerHTML = `
+        <span class="material-symbols-outlined text-[14px]">alarm</span>
+        <span>${safeCls} consecutive classes to safe threshold</span>
+      `;
+
+      const asgnPct = data.kpi?.assignment_completion_pct || 76;
+      document.getElementById('kpi-asgn-pct').textContent = Math.round(asgnPct) + '%';
+      document.getElementById('kpi-asgn-bar').style.width = Math.min(100, asgnPct) + '%';
+      document.getElementById('kpi-asgn-ratio').textContent = `${data.kpi?.assignments_completed || 19} / ${data.kpi?.assignments_total || 25} Done`;
+      document.getElementById('kpi-asgn-breakdown').innerHTML = `
+        <span class="text-emerald-700 font-bold">${data.kpi?.assignments_completed || 19} Completed</span> • 
+        <span class="text-amber-700 font-bold">${data.kpi?.assignments_pending || 6} Pending</span>
+      `;
+
+      habitTracker = new MonthlyHabitTracker(regNo);
+      renderHabitsUI();
+
+      if (data.weekly_trends) {
+        renderAcademicChart(data.weekly_trends);
+      }
+
+      renderSubjectPerformanceView(data.subject_performances);
+      loadTasks();
+    }
+
+    function renderSubjectPerformanceView(subjects) {
+      const container = document.getElementById('full-subjects-grid');
+      if (!container || !subjects) return;
+
+      container.innerHTML = subjects.map(s => {
+        const isBelow = s.internal_marks_pct < 75 || s.attendance_pct < 75;
+        return `
+          <div class="p-4 rounded-2xl border ${isBelow ? 'bg-amber-50/50 border-amber-200/70' : 'bg-white/80 border-[#eddcd2]'} space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-[#292320]">${s.subject_name}</span>
+                <span class="text-[10px] text-stone-500 font-mono ml-1">(${s.subject_code})</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isBelow ? 'bg-amber-100 text-amber-900' : 'bg-emerald-100 text-emerald-900'}">
+                ${isBelow ? 'Below Cutoff' : 'Good Standing'}
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+              <div>
+                <span class="text-[10px] text-stone-500 font-medium">Internal Marks</span>
+                <div class="font-bold ${s.internal_marks_pct < 75 ? 'text-amber-800' : 'text-[#292320]'}">${s.internal_marks_pct}% / 75% Goal</div>
+              </div>
+              <div>
+                <span class="text-[10px] text-stone-500 font-medium">Attendance</span>
+                <div class="font-bold ${s.attendance_pct < 75 ? 'text-rose-700' : 'text-[#292320]'}">${s.attendance_pct}% / 75% Cutoff</div>
+              </div>
+            </div>
+
+            <div class="space-y-1 pt-1">
+              <div class="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full" style="width: ${Math.min(100, s.internal_marks_pct)}%"></div>
+              </div>
+              <div class="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style="width: ${Math.min(100, s.attendance_pct)}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Role Switcher Demo Pill
+    function renderRoleSwitcher() {
+      const bar = document.createElement('div');
+      bar.id = 'role-switcher-bar';
+      bar.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; align-items: center; gap: 8px; background: rgba(43, 38, 35, 0.94); backdrop-filter: blur(14px); padding: 7px 16px; border-radius: 9999px; box-shadow: 0 16px 36px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.18); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px;">
+          <span style="color: #fed7aa; font-weight: 700; margin-right: 4px; display: flex; align-items: center; gap: 5px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #f97316; display: inline-block;"></span> [Demo Switcher]
+          </span>
+          <a href="${isFile ? 'student.html' : '/student'}" style="color: #ffffff; text-decoration: none; padding: 4px 11px; border-radius: 9999px; background: #ea580c; font-weight: 700; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">Student</a>
+          <a href="${isFile ? 'mentor.html' : '/mentor'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Mentor</a>
+          <a href="${isFile ? 'admin.html' : '/admin'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Admin</a>
+          <a href="${isFile ? 'lab.html' : '/lab'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Lab</a>
+          <a href="${isFile ? 'login.html' : '/login'}" onclick="logout(); return false;" style="color: #fca5a5; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(239,68,68,0.18); font-weight: 600; margin-left: 4px;">Logout</a>
+        </div>
+      `;
+      document.body.appendChild(bar);
+    }
+
+    renderRoleSwitcher();
+    loadStudentDashboard();
+  </script>
+</body>
+</html>

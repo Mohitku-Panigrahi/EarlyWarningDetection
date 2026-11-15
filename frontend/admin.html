@@ -1,0 +1,2770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="web_dashboard" name="shell-type"/>
+  <title>LPU-RISK-01 Institutional Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              800: '#9a3412',
+              900: '#7c2d12',
+            },
+            warmBg: '#f7ebe3',
+            cardBg: '#faeee5',
+            matcha: '#b5d774',
+            coralPill: '#ff8a73',
+            primary: "#ea580c",
+            "primary-container": "#c2410c",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#fed7aa",
+            secondary: "#2b2623",
+            background: "#f7ebe3",
+            surface: "#f7ebe3",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#faeee5",
+            "surface-container": "#eddcd2",
+            "surface-container-high": "#fae1d2",
+            "surface-container-highest": "#fdd8c5",
+            "on-surface": "#292320",
+            "on-surface-variant": "#786c65",
+            outline: "#a89f91",
+            "outline-variant": "#eddcd2",
+            tertiary: "#166534",
+            "tertiary-container": "#dcfce7",
+            "tertiary-fixed": "#b5d774",
+            "tertiary-fixed-dim": "#86efac",
+            error: "#dc2626",
+            "error-container": "#fee2e2",
+            "on-error-container": "#991b1b"
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "Inter", "sans-serif"]
+          },
+          boxShadow: {
+            'glow-orange': '0 10px 25px -4px rgba(234, 88, 12, 0.4)',
+            'floating-card': '0 16px 36px -8px rgba(180, 140, 125, 0.18), 0 4px 12px -2px rgba(180, 140, 125, 0.08)',
+            'inner-glow': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.9)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f7ebe3;
+      color: #292320;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 14px 34px -8px rgba(180, 140, 125, 0.18), 0 4px 12px -2px rgba(180, 140, 125, 0.06);
+    }
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 42px -8px rgba(180, 140, 125, 0.25), 0 6px 14px -2px rgba(180, 140, 125, 0.1);
+      border-color: #ffffff;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #eddcd2; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-[#f7ebe3] text-[#292320] antialiased font-sans min-h-screen flex relative overflow-x-hidden">
+
+  <!-- Ambient Glow Background Circles (Login page match) -->
+  <div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#fdd8c5]/40 blur-3xl"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-[#fae1d2]/50 blur-3xl"></div>
+  </div>
+
+  <!-- Mobile Drawer Backdrop Overlay -->
+  <div id="adminSidebarBackdrop" onclick="toggleAdminDrawer()" class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 hidden transition-opacity lg:hidden"></div>
+
+  <!-- Collapsible Navigation Drawer / Desktop Sidebar -->
+  <aside id="adminSidebar" class="fixed left-0 top-0 h-full w-64 bg-white/95 backdrop-blur-md shadow-2xl z-50 flex flex-col justify-between select-none -translate-x-full lg:translate-x-0 transition-transform duration-300 border-r border-[#fae1d2]">
+    <div class="flex flex-col flex-1 min-h-0">
+      <!-- Sidebar Brand Header -->
+      <div class="h-16 px-4 flex items-center justify-between border-b border-[#fae1d2]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+            ED
+          </div>
+          <div class="flex flex-col">
+            <span class="font-bold text-sm text-[#292320] tracking-tight leading-none">EDUVANCE</span>
+            <span class="text-[10px] text-stone-500 uppercase tracking-wider font-semibold mt-0.5">Institutional Admin</span>
+          </div>
+        </div>
+        <button onclick="toggleAdminDrawer()" class="lg:hidden p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100" title="Close drawer">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <!-- Navigation Menu Items (5 Functional Views) -->
+      <div class="px-3 py-2">
+        <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider px-2">Core Operations</span>
+      </div>
+      <nav class="flex-1 px-2 space-y-1 overflow-y-auto">
+        <button onclick="switchAdminPane('overview')" id="nav-btn-overview" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-600 text-white transition-all admin-nav-btn text-left shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">account_balance</span>
+          <span>Institutional Overview</span>
+        </button>
+
+        <button onclick="switchAdminPane('students')" id="nav-btn-students" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white transition-all admin-nav-btn text-left">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[18px]">group</span>
+            <span>Students &amp; Cohorts</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-bold">60</span>
+        </button>
+
+        <button onclick="switchAdminPane('mentors')" id="nav-btn-mentors" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white transition-all admin-nav-btn text-left">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[18px]">supervisor_account</span>
+            <span>Mentor Governance</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-bold">6</span>
+        </button>
+
+        <button onclick="switchAdminPane('governance')" id="nav-btn-governance" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white transition-all admin-nav-btn text-left">
+          <span class="material-symbols-outlined text-[18px]">neurology</span>
+          <span>Model Governance</span>
+        </button>
+
+        <button onclick="switchAdminPane('audit')" id="nav-btn-audit" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-stone-600 hover:bg-white transition-all admin-nav-btn text-left">
+          <span class="material-symbols-outlined text-[18px]">verified_user</span>
+          <span>System Audit Logs</span>
+        </button>
+
+        <div class="pt-3 pb-1 px-2">
+          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider">Research Syllabus</span>
+        </div>
+
+        <a href="/lab" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-orange-700 hover:bg-orange-50 transition-colors">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[18px] text-orange-600">science</span>
+            <span>Algorithm &amp; AI Lab</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] bg-orange-100 text-orange-800 font-bold">CSE276</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Admin User Profile & Logout -->
+    <div class="p-3 border-t border-[#fae1d2] bg-[#faeee5]">
+      <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white/90 border border-[#eddcd2] shadow-sm">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs shadow-sm">
+            RV
+          </div>
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs font-bold text-[#292320] truncate" id="admin-user-name">Dr. Rajesh Verma</span>
+            <span class="text-[10px] text-stone-500 truncate">Dean of Academic Affairs</span>
+          </div>
+        </div>
+        <button onclick="logout()" class="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper (offset by lg:pl-64) -->
+  <div class="relative z-10 w-full lg:pl-64 flex flex-col min-h-screen">
+    
+    <!-- Top Sticky Header -->
+    <header class="h-16 bg-[#f7ebe3]/90 backdrop-blur-md border-b border-[#fae1d2] sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleAdminDrawer()" class="lg:hidden p-2 -ml-2 rounded-xl text-stone-600 hover:bg-white transition-colors flex items-center justify-center" aria-label="Open Navigation Menu">
+          <span class="material-symbols-outlined text-[24px]">menu</span>
+        </button>
+        <div class="flex items-center gap-2 text-xs font-semibold text-stone-500">
+          <span>Administration</span>
+          <span class="material-symbols-outlined text-[14px] text-stone-400">chevron_right</span>
+          <span id="breadcrumb-active-view" class="text-[#292320] font-bold text-sm">Institutional Overview</span>
+        </div>
+      </div>
+
+      <!-- Quick Telemetry & Real Section Selector -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white/80 rounded-xl border border-[#eddcd2] text-xs shadow-sm">
+          <span class="material-symbols-outlined text-[16px] text-orange-600">tune</span>
+          <select id="headerSectionSelect" onchange="onHeaderSectionChange(this.value)" class="bg-transparent text-[#292320] font-bold text-xs focus:outline-none cursor-pointer pr-1">
+            <option value="ALL" selected>All Sections (60 Students)</option>
+            <option value="K3P25IL">Section K3P25IL (20 Students)</option>
+            <option value="K3P25IM">Section K3P25IM (20 Students)</option>
+            <option value="K3P25IN">Section K3P25IN (20 Students)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-emerald-100/70 text-emerald-800 px-3 py-1.5 rounded-full text-[11px] font-bold border border-emerald-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Sync Live: 08:30 IST</span>
+        </div>
+
+        <button onclick="logout()" class="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors hidden sm:block" title="Logout">
+          <span class="material-symbols-outlined text-[20px]">logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Content (Panes) -->
+    <main class="flex-1 p-4 sm:p-6 max-w-[1440px] w-full mx-auto">
+
+      <!-- ================= PANE 1: INSTITUTIONAL OVERVIEW ================= -->
+      <div id="pane-admin-overview" class="admin-pane space-y-5">
+        <!-- Banner & Session Metadata -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-5 rounded-[26px] glass-card">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-lg sm:text-xl font-extrabold text-[#292320] tracking-tight">Institutional Early-Warning Overview</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-800 border border-orange-200">v2.4-lpu Calibrated</span>
+            </div>
+            <p class="text-xs text-stone-600 mt-1">Real-time cohort telemetry across B.Tech CSE sections (60 students).</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="px-3 py-1.5 rounded-xl bg-[#faeee5] font-semibold text-stone-700 border border-[#eddcd2]">Session: 2024–2025 Regular (Sem 4)</span>
+            <span class="px-3 py-1.5 rounded-xl bg-emerald-100/70 text-emerald-800 font-bold border border-emerald-200">OPERATIONAL</span>
+          </div>
+        </div>
+
+        <!-- Real KPI Cards (5-Column Responsive Matrix) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div class="p-4 rounded-[22px] glass-card glass-card-hover flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-stone-500 uppercase">Total Students</span>
+            <div class="my-1.5">
+              <span id="kpi-monitored-total" class="text-2xl font-black text-[#292320]">60</span>
+              <span class="text-xs text-stone-500 ml-1 font-medium">Monitored</span>
+            </div>
+            <span class="text-[10px] text-stone-400">3 LPU Cohort Sections</span>
+          </div>
+
+          <div class="p-4 rounded-[22px] glass-card glass-card-hover flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-emerald-800 uppercase">On Track</span>
+            <div class="my-1.5 flex items-baseline gap-1">
+              <span id="kpi-ontrack-count" class="text-2xl font-black text-emerald-700">43</span>
+              <span id="kpi-ontrack-pct" class="text-xs font-bold text-emerald-600">(71.7%)</span>
+            </div>
+            <div class="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+              <div id="kpi-ontrack-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full" style="width: 71.7%"></div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-[22px] glass-card glass-card-hover flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-amber-800 uppercase">Students on Watch</span>
+            <div class="my-1.5 flex items-baseline gap-1">
+              <span id="kpi-watch-count" class="text-2xl font-black text-amber-700">7</span>
+              <span id="kpi-watch-pct" class="text-xs font-bold text-amber-600">(11.7%)</span>
+            </div>
+            <div class="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+              <div id="kpi-watch-bar" class="bg-gradient-to-r from-amber-500 to-yellow-500 h-full" style="width: 11.7%"></div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-[22px] glass-card glass-card-hover flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-rose-800 uppercase">Needs Review</span>
+            <div class="my-1.5 flex items-baseline gap-1">
+              <span id="kpi-review-count" class="text-2xl font-black text-rose-700">10</span>
+              <span id="kpi-review-pct" class="text-xs font-bold text-rose-600">(16.7%)</span>
+            </div>
+            <div class="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+              <div id="kpi-review-bar" class="bg-gradient-to-r from-rose-500 to-red-600 h-full" style="width: 16.7%"></div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-[22px] glass-card glass-card-hover flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-orange-800 uppercase">Pending Actions</span>
+            <div class="my-1.5">
+              <span id="kpi-pending-decisions" class="text-2xl font-black text-orange-700">17</span>
+              <span class="text-xs text-stone-500 ml-1 font-medium">Reviews</span>
+            </div>
+            <span class="text-[10px] text-stone-400">Assigned across 6 mentors</span>
+          </div>
+        </div>
+
+        <!-- Section Risk Distribution Bar Chart & Signals Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Real Section Comparison Bar Chart (Col 7) -->
+          <div class="lg:col-span-7 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+              <div>
+                <h3 class="font-bold text-sm text-primary flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[18px] text-secondary">bar_chart</span>
+                  <span>Section-Wise Risk Distribution</span>
+                </h3>
+                <p class="text-xs text-on-surface-variant">Live comparison across K3P25IL, K3P25IM, and K3P25IN.</p>
+              </div>
+              <div class="flex items-center gap-2 text-[11px]">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span> On Track</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-amber-500"></span> Watch</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-500"></span> Review</span>
+              </div>
+            </div>
+            <div class="relative w-full h-[240px] pt-3">
+              <canvas id="sectionRiskBarChart"></canvas>
+            </div>
+            <div class="pt-3 border-t border-surface-container flex items-center justify-between text-xs text-on-surface-variant">
+              <span>Section K3P25IM has highest friction rate (5 review cases).</span>
+              <button onclick="switchAdminPane('students'); filterStudentsBySection('K3P25IM')" class="text-secondary font-semibold hover:underline">Inspect K3P25IM →</button>
+            </div>
+          </div>
+
+          <!-- Priority Action Signals (Col 5) -->
+          <div class="lg:col-span-5 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-container">
+              <h3 class="font-bold text-sm text-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px] text-error">notification_important</span>
+                <span>Priority Action Queue</span>
+              </h3>
+              <span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[11px] font-bold">4 Active</span>
+            </div>
+            <div class="space-y-2.5" id="priority-signals-container">
+              <!-- Dynamically populated from API -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PANE 2: STUDENTS & COHORTS ================= -->
+      <div id="pane-admin-students" class="admin-pane hidden space-y-4">
+        <!-- Filter and Search Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div>
+            <h2 class="text-base font-bold text-primary">Student Cohort Telemetry</h2>
+            <p class="text-xs text-on-surface-variant">Searchable database roster of all 60 monitored students across LPU sections.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Search Input -->
+            <div class="relative w-48 sm:w-56">
+              <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-outline">search</span>
+              <input type="text" id="studentSearchInput" oninput="debounceStudentSearch()" placeholder="Search student or Reg No..."
+                     class="w-full h-8 pl-8 pr-2.5 rounded-lg bg-surface-container-low text-xs border border-surface-container focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary"/>
+            </div>
+
+            <!-- Section Filter Dropdown -->
+            <select id="studentSectionFilter" onchange="onStudentFilterChange()" class="h-8 px-2.5 rounded-lg bg-surface-container-low text-xs font-semibold text-primary border border-surface-container focus:outline-none cursor-pointer">
+              <option value="ALL">All Sections (60)</option>
+              <option value="K3P25IL">Section K3P25IL</option>
+              <option value="K3P25IM">Section K3P25IM</option>
+              <option value="K3P25IN">Section K3P25IN</option>
+            </select>
+
+            <!-- Status Filter Dropdown -->
+            <select id="studentStatusFilter" onchange="onStudentFilterChange()" class="h-8 px-2.5 rounded-lg bg-surface-container-low text-xs font-semibold text-primary border border-surface-container focus:outline-none cursor-pointer">
+              <option value="ALL">All Statuses</option>
+              <option value="NEEDS REVIEW">Needs Review</option>
+              <option value="WATCH">Watch</option>
+              <option value="ON TRACK">On Track</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Student Table -->
+        <div class="rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant font-semibold uppercase tracking-wider text-[11px] border-b border-surface-container">
+                  <th class="py-3 px-3.5">Student Profile</th>
+                  <th class="py-3 px-3">Section</th>
+                  <th class="py-3 px-3 text-right">CGPA</th>
+                  <th class="py-3 px-3 text-right">Attendance</th>
+                  <th class="py-3 px-3 text-right">Internal Avg</th>
+                  <th class="py-3 px-3">Academic Status</th>
+                  <th class="py-3 px-3 text-center">Risk Score</th>
+                  <th class="py-3 px-3">Assigned Mentor</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody" class="divide-y divide-surface-container text-on-surface">
+                <!-- Dynamically loaded via loadStudents() -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="flex items-center justify-between px-4 py-3 bg-surface-container-low border-t border-surface-container text-xs text-on-surface-variant">
+            <span id="studentPaginationText">Showing 1 to 15 of 60 students</span>
+            <div class="flex items-center gap-1.5">
+              <button id="prevPageBtn" onclick="changeStudentPage(-1)" class="px-2.5 py-1 rounded border border-surface-container bg-surface-container-lowest hover:bg-surface-container font-semibold disabled:opacity-40 disabled:cursor-not-allowed">Previous</button>
+              <span id="currentPageNum" class="px-2 font-bold text-primary">Page 1 of 4</span>
+              <button id="nextPageBtn" onclick="changeStudentPage(1)" class="px-2.5 py-1 rounded border border-surface-container bg-surface-container-lowest hover:bg-surface-container font-semibold disabled:opacity-40 disabled:cursor-not-allowed">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PANE 3: FACULTY MENTOR GOVERNANCE & OVERSIGHT ================= -->
+      <div id="pane-admin-mentors" class="admin-pane hidden space-y-5">
+        
+        <!-- Master Governance Banner & Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-primary">Faculty Mentor Governance &amp; Student Oversight</h2>
+              <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-[10px]">Institutional Layer</span>
+            </div>
+            <p class="text-xs text-on-surface-variant mt-0.5">Supervising mentor-student engagement, academic support velocity, follow-up accountability, and intervention decisions.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-bold text-xs">6 Mentors Active • 60 Mentees</span>
+            <button onclick="loadAdminGovernanceAll()" class="p-1.5 rounded-lg border border-surface-container text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors text-xs flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">refresh</span>
+              <span class="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Sub-Navigation Views / Tabs -->
+        <div class="flex items-center gap-1.5 border-b border-surface-container pb-2 overflow-x-auto text-xs">
+          <button onclick="switchGovSubTab('overview')" id="govtab-btn-overview" class="gov-subtab-btn px-3 py-1.5 rounded-lg font-bold bg-primary text-on-primary transition-all shadow-sm">
+            Governance Overview
+          </button>
+          <button onclick="switchGovSubTab('mentors')" id="govtab-btn-mentors" class="gov-subtab-btn px-3 py-1.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-all">
+            Mentor Performance
+          </button>
+          <button onclick="switchGovSubTab('relationships')" id="govtab-btn-relationships" class="gov-subtab-btn px-3 py-1.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-all">
+            Student-Mentor Relationships
+          </button>
+          <button onclick="switchGovSubTab('meetings')" id="govtab-btn-meetings" class="gov-subtab-btn px-3 py-1.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-all">
+            Meeting &amp; Follow-up Monitoring
+          </button>
+          <button onclick="switchGovSubTab('interventions')" id="govtab-btn-interventions" class="gov-subtab-btn px-3 py-1.5 rounded-lg font-semibold text-on-surface-variant hover:bg-surface-container transition-all">
+            Intervention Oversight
+          </button>
+        </div>
+
+        <!-- SUBTAB 1: GOVERNANCE OVERVIEW -->
+        <div id="govtab-panel-overview" class="gov-panel space-y-5">
+          <!-- KPI Metrics Row -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Active Mentors</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-primary font-mono" id="gov-kpi-mentors">6</span>
+              </div>
+              <span class="text-[10px] text-emerald-700 font-semibold">100% Onboarded</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Assigned Students</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-primary font-mono" id="gov-kpi-assigned">60</span>
+              </div>
+              <span class="text-[10px] text-on-surface-variant font-medium">10 per faculty</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Active Support</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-secondary font-mono" id="gov-kpi-active-support">--</span>
+              </div>
+              <span class="text-[10px] text-secondary font-medium">Tasks or Recent Session</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Awaiting Follow-up</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-amber-700 font-mono" id="gov-kpi-awaiting-followup">--</span>
+              </div>
+              <span class="text-[10px] text-amber-600 font-medium">Scheduled check-ins</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Pending Decisions</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-primary font-mono" id="gov-kpi-pending-decisions">--</span>
+              </div>
+              <span class="text-[10px] text-outline font-medium">Interventions proposed</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-error uppercase tracking-wider">Overdue Follow-ups</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-error font-mono" id="gov-kpi-overdue-followups">--</span>
+              </div>
+              <span class="text-[10px] text-error font-semibold">Immediate attention</span>
+            </div>
+          </div>
+
+          <!-- Analytical Charts (Workload + Student Status Stacked) -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Left Chart: Mentor Workload & Quota Utilization -->
+            <div class="lg:col-span-6 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                  <div>
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Mentor Workload &amp; Allocation</h3>
+                    <p class="text-[11px] text-on-surface-variant">Allocated students against institutional quota cap (10 mentees maximum).</p>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">Balanced Load</span>
+                </div>
+                <div class="relative w-full h-[220px] pt-3">
+                  <canvas id="govWorkloadBarChart"></canvas>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-on-surface-variant">
+                <span>Green bar: Assigned | Dark base: Max Quota</span>
+                <span class="text-secondary font-semibold">100% capacity utilized</span>
+              </div>
+            </div>
+
+            <!-- Right Chart: Student Support Distribution per Mentor -->
+            <div class="lg:col-span-6 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                  <div>
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Student Support Distribution</h3>
+                    <p class="text-[11px] text-on-surface-variant">Mentee academic health breakdown across On Track, Watch, and Needs Review.</p>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Cohort Demographics</span>
+                </div>
+                <div class="relative w-full h-[220px] pt-3">
+                  <canvas id="govSupportStackedBarChart"></canvas>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-on-surface-variant">
+                <span>Stacked: On Track (Green), Watch (Amber), Needs Review (Red)</span>
+                <button onclick="switchGovSubTab('relationships')" class="text-primary font-bold hover:underline">Inspect Students →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority Institutional Attention Queue -->
+          <div class="p-4 sm:p-5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-600 text-[20px]">warning</span>
+                <div>
+                  <h3 class="text-sm font-bold text-primary">Institutional Attention Queue</h3>
+                  <p class="text-xs text-on-surface-variant">Actionable items requiring dean or mentor follow-up (overdue tasks, declining trajectories, pending reviews).</p>
+                </div>
+              </div>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200" id="gov-queue-count">-- Cases</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="gov-attention-queue-list">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 2: MENTOR PERFORMANCE & DIRECTORY -->
+        <div id="govtab-panel-mentors" class="gov-panel hidden space-y-4">
+          <!-- Filter Toolbar -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-surface-container-lowest border border-surface-container">
+            <div class="flex items-center gap-2 flex-1 max-w-md">
+              <div class="relative w-full">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-outline">search</span>
+                <input type="text" id="gov-mentor-search" oninput="filterGovMentors()" placeholder="Search mentor name, department, or faculty code..." class="w-full text-xs pl-9 pr-3 py-2 rounded-lg border border-surface-container bg-surface-container-low focus:outline-none focus:border-primary text-on-surface">
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <label class="text-outline font-semibold">Department:</label>
+              <select id="gov-mentor-dept-filter" onchange="filterGovMentors()" class="p-2 rounded-lg border border-surface-container bg-surface-container-low text-xs font-semibold text-primary focus:outline-none">
+                <option value="ALL">All Departments</option>
+                <option value="Computer Science & Engineering">Computer Science &amp; Engineering</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Mentor Directory Grid Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="govMentorDirectoryGrid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- SUBTAB 3: STUDENT-MENTOR RELATIONSHIPS -->
+        <div id="govtab-panel-relationships" class="gov-panel hidden space-y-4">
+          <!-- Filter Toolbar -->
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+            <div class="flex items-center gap-2 flex-1 max-w-sm">
+              <div class="relative w-full">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-outline">search</span>
+                <input type="text" id="gov-rel-search" oninput="filterGovRelationships()" placeholder="Search mentee name or reg #..." class="w-full text-xs pl-9 pr-3 py-2 rounded-lg border border-surface-container bg-surface-container-low focus:outline-none focus:border-primary text-on-surface">
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <select id="gov-rel-section-filter" onchange="filterGovRelationships()" class="p-2 rounded-lg border border-surface-container bg-surface-container-low font-semibold text-primary focus:outline-none">
+                <option value="ALL">All Sections (60 Students)</option>
+                <option value="K3P25IL">Section K3P25IL</option>
+                <option value="K3P25IM">Section K3P25IM</option>
+                <option value="K3P25IN">Section K3P25IN</option>
+              </select>
+              <select id="gov-rel-mentor-filter" onchange="filterGovRelationships()" class="p-2 rounded-lg border border-surface-container bg-surface-container-low font-semibold text-primary focus:outline-none">
+                <option value="ALL">All Faculty Mentors</option>
+              </select>
+              <select id="gov-rel-status-filter" onchange="filterGovRelationships()" class="p-2 rounded-lg border border-surface-container bg-surface-container-low font-semibold text-primary focus:outline-none">
+                <option value="ALL">All Statuses</option>
+                <option value="NEEDS REVIEW">Needs Review</option>
+                <option value="WATCH">Watch</option>
+                <option value="ON TRACK">On Track</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Relationships Roster Table -->
+          <div class="border border-surface-container rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-surface-container-low text-[10px] font-bold text-outline uppercase tracking-wider border-b border-surface-container">
+                  <th class="py-2.5 px-3">Student</th>
+                  <th class="py-2.5 px-3">Section</th>
+                  <th class="py-2.5 px-3">Assigned Mentor</th>
+                  <th class="py-2.5 px-3">Academic Status</th>
+                  <th class="py-2.5 px-3 text-center">Attendance</th>
+                  <th class="py-2.5 px-3 text-center">Assessment</th>
+                  <th class="py-2.5 px-3 text-center">Tasks (Active/Done)</th>
+                  <th class="py-2.5 px-3">Last Meeting</th>
+                  <th class="py-2.5 px-3">Next Follow-up</th>
+                  <th class="py-2.5 px-3">Support Status</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="govRelationshipsTableBody" class="divide-y divide-surface-container text-on-surface">
+                <!-- Loaded dynamically via loadGovRelationships() -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="flex items-center justify-between text-xs text-on-surface-variant px-1" id="gov-rel-pagination">
+            <span id="gov-rel-count-text">Showing 15 of 60 records</span>
+            <div class="flex items-center gap-1.5" id="gov-rel-pagination-btns">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 4: MEETING & FOLLOW-UP MONITORING -->
+        <div id="govtab-panel-meetings" class="gov-panel hidden space-y-5">
+          <!-- 4 Meeting KPIs -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Total Recorded Sessions</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-primary font-mono" id="gov-meet-total">--</span>
+              </div>
+              <span class="text-[10px] text-on-surface-variant font-medium">Institution-wide</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider">Unique Students Met</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-secondary font-mono" id="gov-meet-unique">--</span>
+              </div>
+              <span class="text-[10px] text-secondary font-medium" id="gov-meet-coverage-pct">--% Coverage</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Upcoming Follow-ups</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-amber-700 font-mono" id="gov-meet-upcoming">--</span>
+              </div>
+              <span class="text-[10px] text-amber-600 font-medium">Scheduled check-ins</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[10px] font-bold text-error uppercase tracking-wider">Overdue Follow-ups</span>
+              <div class="my-1">
+                <span class="text-2xl font-bold text-error font-mono" id="gov-meet-overdue">--</span>
+              </div>
+              <span class="text-[10px] text-error font-semibold">Immediate attention</span>
+            </div>
+          </div>
+
+          <!-- Meeting Frequency & Modality Charts -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Weekly Meeting Trend -->
+            <div class="lg:col-span-8 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                  <div>
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Weekly Mentoring Frequency</h3>
+                    <p class="text-[11px] text-on-surface-variant">Trend of recorded 1-on-1 and group mentoring sessions conducted over semester weeks (W1–W8).</p>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-secondary/10 text-secondary">Temporal Velocity</span>
+                </div>
+                <div class="relative w-full h-[200px] pt-3">
+                  <canvas id="govMeetingWeeklyChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modality Doughnut -->
+            <div class="lg:col-span-4 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                  <div>
+                    <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Meeting Modality</h3>
+                    <p class="text-[11px] text-on-surface-variant">In Person vs Online vs Phone.</p>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Modality</span>
+                </div>
+                <div class="relative w-full h-[200px] pt-3 flex items-center justify-center">
+                  <canvas id="govMeetingModalityChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Students Awaiting Follow-up Queue Table -->
+          <div class="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-container">
+              <div>
+                <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-amber-600">schedule</span>
+                  <span>Students Awaiting Follow-up Check-ins</span>
+                </h3>
+                <p class="text-[11px] text-on-surface-variant">Priority queue tracking scheduled check-in dates agreed during previous mentoring sessions.</p>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200" id="gov-followups-queue-count">-- Pending</span>
+            </div>
+
+            <div class="border border-surface-container rounded-lg overflow-hidden">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-surface-container-low text-[10px] font-bold text-outline uppercase tracking-wider border-b border-surface-container">
+                    <th class="py-2.5 px-3">Student</th>
+                    <th class="py-2.5 px-3">Section</th>
+                    <th class="py-2.5 px-3">Assigned Mentor</th>
+                    <th class="py-2.5 px-3">Last Meeting</th>
+                    <th class="py-2.5 px-3">Follow-up Target</th>
+                    <th class="py-2.5 px-3 text-center">Status</th>
+                    <th class="py-2.5 px-3">Agreed Action Summary</th>
+                  </tr>
+                </thead>
+                <tbody id="govFollowupsTableBody" class="divide-y divide-surface-container text-on-surface">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Institutional Meeting Records Log Table -->
+          <div class="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-container">
+              <div>
+                <h3 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-primary">view_list</span>
+                  <span>Complete Institutional Mentoring Records</span>
+                </h3>
+                <p class="text-[11px] text-on-surface-variant">Verified audit trail of mentoring discussions, duration, concerns, and actions.</p>
+              </div>
+            </div>
+
+            <div class="border border-surface-container rounded-lg overflow-hidden">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-surface-container-low text-[10px] font-bold text-outline uppercase tracking-wider border-b border-surface-container">
+                    <th class="py-2.5 px-3">Date</th>
+                    <th class="py-2.5 px-3">Mentee</th>
+                    <th class="py-2.5 px-3">Faculty Mentor</th>
+                    <th class="py-2.5 px-3">Modality</th>
+                    <th class="py-2.5 px-3">Discussion Summary</th>
+                    <th class="py-2.5 px-3">Agreed Actions</th>
+                    <th class="py-2.5 px-3 text-center">Follow-up</th>
+                  </tr>
+                </thead>
+                <tbody id="govAllMeetingsTableBody" class="divide-y divide-surface-container text-on-surface">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div id="gov-meetings-empty-state" class="hidden p-8 text-center bg-surface-container-low rounded-xl border border-dashed border-surface-container space-y-2">
+              <span class="material-symbols-outlined text-4xl text-outline">record_voice_over</span>
+              <h4 class="font-bold text-primary text-sm">No Mentoring Sessions Recorded Yet</h4>
+              <p class="text-xs text-on-surface-variant max-w-md mx-auto">Faculty mentors can log 1-on-1 and group meetings directly from their Mentor Workspace. Recorded sessions will appear here for institutional oversight.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 5: INTERVENTION OVERSIGHT -->
+        <div id="govtab-panel-interventions" class="gov-panel hidden space-y-5">
+          <!-- Status Counters -->
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="gov-inv-counters">
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+              <span class="text-[10px] font-bold text-outline uppercase tracking-wider block">Total Proposals</span>
+              <span class="text-2xl font-bold text-primary font-mono" id="gov-inv-total">--</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+              <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Awaiting Mentor Review</span>
+              <span class="text-2xl font-bold text-amber-700 font-mono" id="gov-inv-proposed">--</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+              <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">Approved &amp; Active</span>
+              <span class="text-2xl font-bold text-blue-700 font-mono" id="gov-inv-approved">--</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+              <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Completed</span>
+              <span class="text-2xl font-bold text-emerald-700 font-mono" id="gov-inv-completed">--</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Dismissed / Rejected</span>
+              <span class="text-2xl font-bold text-slate-600 font-mono" id="gov-inv-rejected">--</span>
+            </div>
+          </div>
+
+          <!-- Interventions Master Table -->
+          <div class="border border-surface-container rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm">
+            <div class="p-3.5 border-b border-surface-container flex items-center justify-between">
+              <div>
+                <h3 class="text-xs font-bold text-primary uppercase tracking-wider">Institution-Wide Intervention Directives</h3>
+                <p class="text-[11px] text-on-surface-variant">Auditing academic recovery proposals, evidence justification, and administrative review actions.</p>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <select id="gov-inv-status-filter" onchange="loadGovInterventions()" class="p-1.5 rounded-lg border border-surface-container bg-surface-container-low font-semibold text-primary focus:outline-none text-xs">
+                  <option value="">All Statuses</option>
+                  <option value="proposed">Proposed (Awaiting Mentor)</option>
+                  <option value="approved">Approved</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-surface-container-low text-[10px] font-bold text-outline uppercase tracking-wider border-b border-surface-container">
+                  <th class="py-2.5 px-3">Student</th>
+                  <th class="py-2.5 px-3">Mentor</th>
+                  <th class="py-2.5 px-3">Type &amp; Subject</th>
+                  <th class="py-2.5 px-3">Evidence Reason</th>
+                  <th class="py-2.5 px-3">Recommendation Directive</th>
+                  <th class="py-2.5 px-3 text-center">Priority</th>
+                  <th class="py-2.5 px-3 text-center">Status</th>
+                  <th class="py-2.5 px-3 text-right">Admin Action</th>
+                </tr>
+              </thead>
+              <tbody id="govInterventionsTableBody" class="divide-y divide-surface-container text-on-surface">
+                <!-- Loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- ================= PANE 4: MODEL GOVERNANCE ================= -->
+      <div id="pane-admin-governance" class="admin-pane hidden space-y-6">
+        <!-- Model Header -->
+        <div class="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-primary" id="model-name-title">Calibrated Random Forest Classifier</h2>
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">OPERATIONAL</span>
+            </div>
+            <p class="text-xs text-on-surface-variant mt-0.5" id="model-note">v2.4-lpu Calibrated (n_estimators=400, max_depth=8, min_samples_leaf=5) with Isotonic Calibration (cv=5)</p>
+          </div>
+          <div class="text-right text-xs">
+            <span class="text-outline block">Decision Threshold:</span>
+            <span class="font-mono font-bold text-primary text-sm">0.35 Optimal</span>
+          </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="model-metrics-grid">
+          <!-- Injected via loadModelGovernance() -->
+        </div>
+
+        <!-- Confusion Matrix & Demographic Fairness Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Confusion Matrix (Col 5) -->
+          <div class="lg:col-span-5 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
+            <h3 class="font-bold text-sm text-primary flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-secondary">grid_4x4</span>
+              <span>Confusion Matrix (Held-out Test Cohort)</span>
+            </h3>
+            <div class="grid grid-cols-2 gap-2 text-center text-xs pt-1">
+              <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                <span class="text-[10px] text-emerald-800 uppercase font-semibold block">True Negative (Safe)</span>
+                <span id="cm-tn" class="text-xl font-bold text-emerald-900 font-mono">35</span>
+              </div>
+              <div class="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                <span class="text-[10px] text-amber-800 uppercase font-semibold block">False Positive (False Alert)</span>
+                <span id="cm-fp" class="text-xl font-bold text-amber-900 font-mono">6</span>
+              </div>
+              <div class="p-3 rounded-lg bg-red-50 border border-red-200">
+                <span class="text-[10px] text-red-800 uppercase font-semibold block">False Negative (Missed Risk)</span>
+                <span id="cm-fn" class="text-xl font-bold text-red-900 font-mono">3</span>
+              </div>
+              <div class="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                <span class="text-[10px] text-blue-800 uppercase font-semibold block">True Positive (Caught Risk)</span>
+                <span id="cm-tp" class="text-xl font-bold text-blue-900 font-mono">16</span>
+              </div>
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">
+              Model optimizes for <strong>high sensitivity/recall (84.0%)</strong> over precision to prevent unassisted student drop-off.
+            </p>
+          </div>
+
+          <!-- Demographic Fairness Table (Col 7) -->
+          <div class="lg:col-span-7 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm text-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[18px] text-secondary">balance</span>
+                <span>Demographic Parity &amp; Fairness Analysis</span>
+              </h3>
+              <span class="text-[10px] text-outline font-semibold uppercase">Four-Fifths Rule Mandate</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low text-on-surface-variant font-semibold text-[11px] border-b border-surface-container">
+                    <th class="py-2 px-3">Protected Demographic</th>
+                    <th class="py-2 px-3">Sub-Group</th>
+                    <th class="py-2 px-3 text-right">Disparate Impact</th>
+                    <th class="py-2 px-3 text-right">Fairness Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-surface-container text-on-surface">
+                  <tr>
+                    <td class="py-2 px-3 font-semibold text-primary">Admission Route</td>
+                    <td class="py-2 px-3 text-on-surface-variant">Lateral Entry vs Regular</td>
+                    <td class="py-2 px-3 text-right font-mono">0.92</td>
+                    <td class="py-2 px-3 text-right"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Compliant (&gt;0.80)</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold text-primary">Schooling Board</td>
+                    <td class="py-2 px-3 text-on-surface-variant">State Board vs CBSE/ICSE</td>
+                    <td class="py-2 px-3 text-right font-mono">0.88</td>
+                    <td class="py-2 px-3 text-right"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Compliant (&gt;0.80)</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold text-primary">Medium of Instruction</td>
+                    <td class="py-2 px-3 text-on-surface-variant">Regional vs English</td>
+                    <td class="py-2 px-3 text-right font-mono">0.85</td>
+                    <td class="py-2 px-3 text-right"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Compliant (&gt;0.80)</span></td>
+                  </tr>
+                  <tr>
+                    <td class="py-2 px-3 font-semibold text-primary">Home Region</td>
+                    <td class="py-2 px-3 text-on-surface-variant">Non-North vs North Zone</td>
+                    <td class="py-2 px-3 text-right font-mono">0.94</td>
+                    <td class="py-2 px-3 text-right"><span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Compliant (&gt;0.80)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[11px] text-on-surface-variant italic">
+              All 4 demographic dimensions satisfy the EEOC 80% Rule and institutional ethics threshold with zero discriminatory divergence.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= PANE 5: SYSTEM AUDIT LOGS ================= -->
+      <div id="pane-admin-audit" class="admin-pane hidden space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm">
+          <div>
+            <h2 class="text-base font-bold text-primary">System Audit Trail</h2>
+            <p class="text-xs text-on-surface-variant">Cryptographically auditable record of authentication, risk assessments, and human intervention decisions.</p>
+          </div>
+          <button onclick="loadAuditLogs()" class="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-primary font-semibold text-xs flex items-center gap-1.5 border border-surface-container">
+            <span class="material-symbols-outlined text-[16px]">refresh</span>
+            <span>Refresh Ledger</span>
+          </button>
+        </div>
+
+        <div class="rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low text-on-surface-variant font-semibold uppercase tracking-wider text-[11px] border-b border-surface-container">
+                  <th class="py-3 px-3.5">Log ID</th>
+                  <th class="py-3 px-3">Timestamp (IST)</th>
+                  <th class="py-3 px-3">Actor / Role</th>
+                  <th class="py-3 px-3">Action</th>
+                  <th class="py-3 px-3">Entity Type</th>
+                  <th class="py-3 px-3">Details</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody" class="divide-y divide-surface-container text-on-surface font-mono">
+                <!-- Loaded dynamically via loadAuditLogs() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ADMIN MENTOR GOVERNANCE PROFILE DRAWER -->
+  <!-- ========================================================================= -->
+  <div id="admin-mentor-drawer-backdrop" onclick="closeMentorGovernanceDrawer()" class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0"></div>
+  
+  <aside id="admin-mentor-drawer" class="fixed right-0 top-0 h-full w-full max-w-2xl bg-surface-container-lowest shadow-2xl z-50 flex flex-col justify-between translate-x-full transition-transform duration-300 ease-in-out border-l border-surface-container">
+    <!-- Header -->
+    <div class="p-5 border-b border-surface-container bg-surface-container-low flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-primary text-white font-bold flex items-center justify-center text-sm" id="gov-drawer-m-avatar">
+          MS
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-primary" id="gov-drawer-m-name">Dr. Manoj Saini</h3>
+            <span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-bold text-[10px]" id="gov-drawer-m-code">F08</span>
+          </div>
+          <p class="text-xs text-on-surface-variant" id="gov-drawer-m-meta">Assistant Professor • Computer Science &amp; Engineering</p>
+        </div>
+      </div>
+      <button onclick="closeMentorGovernanceDrawer()" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-5" id="gov-drawer-m-content">
+      
+      <!-- Group 1: Assigned Cohort -->
+      <div class="p-4 rounded-xl border border-surface-container bg-surface-container-low space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary">groups</span>
+            <span>Group 1: Assigned Cohort Health</span>
+          </h4>
+          <span class="text-xs font-bold text-primary" id="gov-drawer-m-cohort-count">10 Students</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="p-2.5 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-outline block">Avg Attendance</span>
+            <span class="text-sm font-bold text-primary font-mono" id="gov-drawer-m-avg-att">86.4%</span>
+          </div>
+          <div class="p-2.5 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-outline block">Avg Assessment</span>
+            <span class="text-sm font-bold text-primary font-mono" id="gov-drawer-m-avg-ass">74.2%</span>
+          </div>
+          <div class="p-2.5 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-amber-700 block">Requires Attention</span>
+            <span class="text-sm font-bold text-amber-700 font-mono" id="gov-drawer-m-attention">2 Students</span>
+          </div>
+        </div>
+        <div class="pt-2">
+          <span class="text-[10px] font-bold text-outline block mb-1">Status Breakdown</span>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="p-1.5 bg-emerald-50 text-emerald-800 rounded font-semibold" id="gov-drawer-m-ontrack">8 On Track</div>
+            <div class="p-1.5 bg-amber-50 text-amber-800 rounded font-semibold" id="gov-drawer-m-watch">0 Watch</div>
+            <div class="p-1.5 bg-red-50 text-red-800 rounded font-semibold" id="gov-drawer-m-review">2 Needs Review</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group 2: Academic Support Activity -->
+      <div class="p-4 rounded-xl border border-surface-container bg-surface-container-low space-y-3">
+        <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-secondary">task_alt</span>
+          <span>Group 2: Academic Recovery Support Tasks</span>
+        </h4>
+        <div class="grid grid-cols-4 gap-2 text-center text-xs">
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-outline block">Assigned</span>
+            <span class="text-sm font-bold text-primary font-mono" id="gov-drawer-m-tasks-assigned">4</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-emerald-700 block">Completed</span>
+            <span class="text-sm font-bold text-emerald-700 font-mono" id="gov-drawer-m-tasks-completed">2</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-blue-700 block">In Progress</span>
+            <span class="text-sm font-bold text-blue-700 font-mono" id="gov-drawer-m-tasks-progress">2</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-error block">Overdue</span>
+            <span class="text-sm font-bold text-error font-mono" id="gov-drawer-m-tasks-overdue">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group 3: Mentoring Engagement -->
+      <div class="p-4 rounded-xl border border-surface-container bg-surface-container-low space-y-3">
+        <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-secondary">record_voice_over</span>
+          <span>Group 3: Mentoring Engagement &amp; Sessions</span>
+        </h4>
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-outline block">Total Meetings</span>
+            <span class="text-sm font-bold text-primary font-mono" id="gov-drawer-m-meetings-total">--</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-outline block">Unique Met</span>
+            <span class="text-sm font-bold text-secondary font-mono" id="gov-drawer-m-meetings-unique">--</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-error block">Overdue Follow-ups</span>
+            <span class="text-sm font-bold text-error font-mono" id="gov-drawer-m-meetings-overdue">--</span>
+          </div>
+        </div>
+        <div class="p-3 bg-surface-container-lowest rounded-lg border border-surface-container">
+          <span class="text-[10px] font-bold text-outline uppercase block mb-1.5">Weekly Meeting Cadence (W1–W8)</span>
+          <div class="grid grid-cols-8 gap-1 text-center font-mono text-[11px]" id="gov-drawer-m-weekly-grid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Group 4: Intervention Management -->
+      <div class="p-4 rounded-xl border border-surface-container bg-surface-container-low space-y-3">
+        <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-primary">policy</span>
+          <span>Group 4: Intervention Directives</span>
+        </h4>
+        <div class="grid grid-cols-4 gap-2 text-center text-xs">
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-amber-700 block">Awaiting</span>
+            <span class="text-sm font-bold text-amber-700 font-mono" id="gov-drawer-m-inv-awaiting">--</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-blue-700 block">Approved</span>
+            <span class="text-sm font-bold text-blue-700 font-mono" id="gov-drawer-m-inv-approved">--</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-slate-500 block">Dismissed</span>
+            <span class="text-sm font-bold text-slate-600 font-mono" id="gov-drawer-m-inv-dismissed">--</span>
+          </div>
+          <div class="p-2 bg-surface-container-lowest rounded-lg border border-surface-container">
+            <span class="text-[10px] text-emerald-700 block">Completed</span>
+            <span class="text-sm font-bold text-emerald-700 font-mono" id="gov-drawer-m-inv-completed">--</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="p-4 border-t border-surface-container bg-surface-container-low flex justify-end">
+      <button onclick="closeMentorGovernanceDrawer()" class="px-4 py-2 rounded-lg border border-surface-container bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-primary transition-colors">
+        Close Profile
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- ADMIN STUDENT GOVERNANCE DETAIL DRAWER -->
+  <!-- ========================================================================= -->
+  <div id="admin-student-drawer-backdrop" onclick="closeStudentGovernanceDrawer()" class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 hidden transition-opacity duration-300 opacity-0"></div>
+  
+  <aside id="admin-student-drawer" class="fixed right-0 top-0 h-full w-full max-w-2xl bg-surface-container-lowest shadow-2xl z-50 flex flex-col justify-between translate-x-full transition-transform duration-300 ease-in-out border-l border-surface-container">
+    <!-- Header -->
+    <div class="p-5 border-b border-surface-container bg-surface-container-low flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-secondary text-white font-bold flex items-center justify-center text-sm" id="gov-drawer-s-avatar">
+          AS
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base font-bold text-primary" id="gov-drawer-s-name">Aarav Sharma</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold" id="gov-drawer-s-badge">ON TRACK</span>
+          </div>
+          <p class="text-xs text-on-surface-variant" id="gov-drawer-s-meta">Reg #12511001 • Section K3P25IL • CGPA: 7.82</p>
+        </div>
+      </div>
+      <button onclick="closeStudentGovernanceDrawer()" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-5">
+      
+      <!-- Assigned Mentor Info Card -->
+      <div class="p-3.5 rounded-xl border border-surface-container bg-surface-container-low flex items-center justify-between">
+        <div>
+          <span class="text-[10px] font-bold text-outline uppercase block">Supervising Faculty Mentor</span>
+          <span class="text-sm font-bold text-primary" id="gov-drawer-s-mentor-name">Dr. Manoj Saini</span>
+          <span class="text-xs text-on-surface-variant block" id="gov-drawer-s-mentor-code">Faculty ID: F08 • Computer Science &amp; Engineering</span>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs">Direct Mentorship</span>
+      </div>
+
+      <!-- Longitudinal Academic Trajectory (W1–W8) -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-emerald-600">show_chart</span>
+            <span>Academic Trajectory (W1–W8)</span>
+          </h4>
+          <span class="text-[10px] text-outline">Solid: Observed (W1–W6) • Dashed: Projected</span>
+        </div>
+        <div class="p-3 rounded-xl border border-surface-container bg-surface-container-lowest">
+          <div class="relative w-full h-[160px]">
+            <canvas id="govStudentTrajChartCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weak Subjects Breakdown -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-amber-600">warning</span>
+          <span>Academic Deficits &amp; Weak Subjects (&lt;75% Cutoff)</span>
+        </h4>
+        <div id="gov-drawer-s-weak-subjects" class="space-y-1.5 text-xs">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Mentoring History & Agreed Actions -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-secondary">record_voice_over</span>
+            <span>Recorded Mentoring Sessions</span>
+          </h4>
+          <span class="text-[10px] text-outline" id="gov-drawer-s-meet-count">0 sessions</span>
+        </div>
+        <div id="gov-drawer-s-meetings-list" class="space-y-2 text-xs">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Academic Tasks -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary">task</span>
+            <span>Academic Tasks &amp; Interventions</span>
+          </h4>
+          <span class="text-[10px] text-outline" id="gov-drawer-s-tasks-count">0 tasks</span>
+        </div>
+        <div id="gov-drawer-s-tasks-list" class="space-y-2 text-xs">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="p-4 border-t border-surface-container bg-surface-container-low flex justify-end">
+      <button onclick="closeStudentGovernanceDrawer()" class="px-4 py-2 rounded-lg border border-surface-container bg-surface-container-lowest hover:bg-surface-container text-xs font-semibold text-primary transition-colors">
+        Close
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- ADMINISTRATIVE INTERVENTION REVIEW MODAL -->
+  <!-- ========================================================================= -->
+  <div id="admin-intervention-modal" class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-surface-container space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">policy</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-primary">Administrative Oversight Review</h3>
+            <p class="text-xs text-on-surface-variant" id="modal-inv-subtitle">Intervention Directive #--</p>
+          </div>
+        </div>
+        <button onclick="closeAdminInterventionModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-outline hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <form id="admin-inv-review-form" onsubmit="submitAdminInterventionReview(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="modal-inv-id" value="">
+        <div>
+          <label class="block font-semibold text-on-surface mb-1">Administrative Action <span class="text-error">*</span></label>
+          <select id="modal-inv-action" required class="w-full text-xs p-2.5 rounded-lg border border-surface-container bg-surface-container-low focus:outline-none focus:border-primary text-on-surface">
+            <option value="add_administrative_note" selected>Add Administrative Audit Note</option>
+            <option value="flag_for_review">Flag for Dean / Chair Review</option>
+            <option value="request_clarification">Request Pedagogical Clarification from Mentor</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-on-surface mb-1">Institutional Governance Note <span class="text-error">*</span></label>
+          <textarea id="modal-inv-note" required rows="4" placeholder="Enter administrative observations, justification for flagging, or guidance for the faculty mentor..." class="w-full text-xs p-2.5 rounded-lg border border-surface-container bg-surface-container-low focus:outline-none focus:border-primary text-on-surface"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeAdminInterventionModal()" class="px-3.5 py-2 rounded-lg border border-surface-container text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">
+            Cancel
+          </button>
+          <button type="submit" id="btn-submit-inv-review" class="px-4 py-2 rounded-lg bg-primary hover:bg-primary-container text-white text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">verified</span>
+            <span>Record Administrative Action</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Vanilla JavaScript Backend Integration -->
+  <script>
+    const isFile = window.location.protocol === 'file:';
+    const API_BASE = (window.location.protocol.startsWith('http')) ? '' : 'http://127.0.0.1:8000';
+    let token = localStorage.getItem('lpu_auth_token');
+    let currentUser = null;
+    try {
+      const u = localStorage.getItem('lpu_user');
+      if (u) currentUser = JSON.parse(u);
+    } catch (e) {}
+
+    function logout() {
+      localStorage.removeItem('lpu_auth_token');
+      localStorage.removeItem('lpu_user');
+      window.location.href = isFile ? 'login.html' : '/login';
+    }
+
+    async function ensureAdminSession() {
+      if (!token || !currentUser || currentUser.role !== 'admin') {
+        try {
+          const authRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: 'admin', password: 'admin123' })
+          });
+          if (authRes.ok) {
+            const authData = await authRes.json();
+            token = authData.access_token;
+            currentUser = authData.user || { username: 'admin', role: 'admin', full_name: 'Dr. Rajesh Verma' };
+            localStorage.setItem('lpu_auth_token', token);
+            localStorage.setItem('lpu_user', JSON.stringify(currentUser));
+          }
+        } catch (e) {
+          console.warn('Auto-admin session fallback note:', e);
+        }
+      }
+    }
+
+    // Drawer Mobile Toggle
+    function toggleAdminDrawer() {
+      const sidebar = document.getElementById('adminSidebar');
+      const backdrop = document.getElementById('adminSidebarBackdrop');
+      if (!sidebar || !backdrop) return;
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+      if (isClosed) {
+        backdrop.classList.remove('hidden');
+        sidebar.classList.remove('-translate-x-full');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    // Pane Switcher (5 Views)
+    function switchAdminPane(paneId) {
+      ['overview', 'students', 'mentors', 'governance', 'audit'].forEach(p => {
+        const paneEl = document.getElementById(`pane-admin-${p}`);
+        if (paneEl) paneEl.classList.add('hidden');
+        const btn = document.getElementById(`nav-btn-${p}`);
+        if (btn) {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+          btn.classList.add('text-on-surface-variant');
+        }
+      });
+
+      const targetPane = document.getElementById(`pane-admin-${paneId}`);
+      if (targetPane) targetPane.classList.remove('hidden');
+
+      const targetBtn = document.getElementById(`nav-btn-${paneId}`);
+      if (targetBtn) {
+        targetBtn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+        targetBtn.classList.remove('text-on-surface-variant');
+      }
+
+      // Update Breadcrumb
+      const breadcrumb = document.getElementById('breadcrumb-active-view');
+      const titles = {
+        overview: 'Institutional Overview',
+        students: 'Students & Cohorts',
+        mentors: 'Mentor Governance & Oversight',
+        governance: 'Model Governance',
+        audit: 'System Audit Logs'
+      };
+      if (breadcrumb) breadcrumb.textContent = titles[paneId] || 'Overview';
+
+      // Lazy load view data
+      if (paneId === 'students' && !studentsLoaded) loadStudents();
+      if (paneId === 'mentors') { if (!mentorsLoaded) { loadAdminGovernanceAll(); mentorsLoaded = true; } }
+      if (paneId === 'governance' && !governanceLoaded) loadModelGovernance();
+      if (paneId === 'audit') loadAuditLogs();
+
+      // Close mobile drawer
+      const sidebar = document.getElementById('adminSidebar');
+      if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 1024) {
+        toggleAdminDrawer();
+      }
+    }
+
+    // State Variables
+    let studentsLoaded = false;
+    let mentorsLoaded = false;
+    let governanceLoaded = false;
+    let currentStudentPage = 1;
+    let currentStudentSection = 'ALL';
+    let currentStudentStatus = 'ALL';
+    let currentStudentSearch = '';
+    let searchDebounceTimer = null;
+    let sectionBarChart = null;
+
+    function onHeaderSectionChange(val) {
+      currentStudentSection = val;
+      const f = document.getElementById('studentSectionFilter');
+      if (f) f.value = val;
+      switchAdminPane('students');
+      loadStudents();
+    }
+
+    function filterStudentsBySection(sec) {
+      currentStudentSection = sec;
+      const f = document.getElementById('studentSectionFilter');
+      if (f) f.value = sec;
+      const hf = document.getElementById('headerSectionSelect');
+      if (hf) hf.value = sec;
+      loadStudents();
+    }
+
+    function onStudentFilterChange() {
+      currentStudentSection = document.getElementById('studentSectionFilter')?.value || 'ALL';
+      currentStudentStatus = document.getElementById('studentStatusFilter')?.value || 'ALL';
+      currentStudentPage = 1;
+      loadStudents();
+    }
+
+    function debounceStudentSearch() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        currentStudentSearch = document.getElementById('studentSearchInput')?.value.trim() || '';
+        currentStudentPage = 1;
+        loadStudents();
+      }, 300);
+    }
+
+    function changeStudentPage(delta) {
+      currentStudentPage = Math.max(1, currentStudentPage + delta);
+      loadStudents();
+    }
+
+    // 1. Load Overview Data & Priority Signals
+    async function loadAdminOverview() {
+      await ensureAdminSession();
+      try {
+        let res = await fetch(`${API_BASE}/api/v1/admin/dashboard`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401 || res.status === 403) {
+          await ensureAdminSession();
+          res = await fetch(`${API_BASE}/api/v1/admin/dashboard`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!res.ok) return;
+        }
+        const data = await res.json();
+
+        // Populate KPIs
+        if (data.kpi) {
+          document.getElementById('kpi-monitored-total').textContent = data.kpi.total_monitored_students;
+          document.getElementById('kpi-ontrack-count').textContent = data.kpi.on_track_count;
+          document.getElementById('kpi-ontrack-pct').textContent = `(${data.kpi.on_track_pct}%)`;
+          document.getElementById('kpi-ontrack-bar').style.width = `${data.kpi.on_track_pct}%`;
+
+          document.getElementById('kpi-watch-count').textContent = data.kpi.watch_count;
+          document.getElementById('kpi-watch-pct').textContent = `(${data.kpi.watch_pct}%)`;
+          document.getElementById('kpi-watch-bar').style.width = `${data.kpi.watch_pct}%`;
+
+          document.getElementById('kpi-review-count').textContent = data.kpi.needs_review_count;
+          document.getElementById('kpi-review-pct').textContent = `(${data.kpi.needs_review_pct}%)`;
+          document.getElementById('kpi-review-bar').style.width = `${data.kpi.needs_review_pct}%`;
+
+          document.getElementById('kpi-pending-decisions').textContent = data.kpi.pending_mentor_decisions;
+        }
+
+        // Render Section Comparison Chart (K3P25IL, K3P25IM, K3P25IN)
+        if (data.section_distributions) {
+          renderSectionChart(data.section_distributions);
+        }
+
+        // Populate Priority Action Signals
+        const signalsContainer = document.getElementById('priority-signals-container');
+        if (signalsContainer && data.priority_signals) {
+          signalsContainer.innerHTML = data.priority_signals.map(s => {
+            const isUrgent = s.severity === 'urgent';
+            const badgeBg = isUrgent ? 'bg-red-50 text-red-700 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-200';
+            return `
+              <div class="p-3 rounded-lg border border-surface-container bg-surface-container-low/50 hover:bg-surface-container-low transition-colors space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border ${badgeBg}">${s.category}</span>
+                  <span class="text-[10px] text-outline font-mono">${s.severity.toUpperCase()}</span>
+                </div>
+                <h4 class="font-bold text-xs text-primary">${s.title}</h4>
+                <p class="text-[11px] text-on-surface-variant leading-snug">${s.details}</p>
+                <div class="pt-1 flex items-center justify-end">
+                  <button onclick="handleSignalAction('${s.id}')" class="text-[11px] font-semibold text-secondary hover:underline flex items-center gap-0.5">
+                    <span>${s.action_label}</span>
+                    <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        console.error('Admin overview load error:', err);
+      }
+    }
+
+    function handleSignalAction(signalId) {
+      if (signalId.includes('fairness') || signalId.includes('drift')) {
+        switchAdminPane('governance');
+      } else if (signalId.includes('intervention')) {
+        switchAdminPane('mentors');
+      } else {
+        switchAdminPane('students');
+      }
+    }
+
+    function renderSectionChart(distributions) {
+      const canvas = document.getElementById('sectionRiskBarChart');
+      if (!canvas || !window.Chart) return;
+      if (sectionBarChart) sectionBarChart.destroy();
+
+      const labels = distributions.map(d => d.section);
+      const onTrackData = distributions.map(d => d.on_track);
+      const watchData = distributions.map(d => d.watch);
+      const reviewData = distributions.map(d => d.needs_review);
+
+      const ctx = canvas.getContext('2d');
+      sectionBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'On Track', data: onTrackData, backgroundColor: '#10b981', borderRadius: 4 },
+            { label: 'Watch', data: watchData, backgroundColor: '#f59e0b', borderRadius: 4 },
+            { label: 'Needs Review', data: reviewData, backgroundColor: '#ef4444', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Inter', size: 11, weight: 600 } } },
+            y: { stacked: true, max: 20, ticks: { stepSize: 5, font: { family: 'Inter', size: 10 } }, grid: { color: '#edf2f7' } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(16, 28, 44, 0.95)',
+              padding: 8,
+              cornerRadius: 6,
+              callbacks: {
+                label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} students`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Load Students Data with Filtering & Pagination
+    async function loadStudents() {
+      await ensureAdminSession();
+      try {
+        let url = `${API_BASE}/api/v1/admin/students?limit=15&page=${currentStudentPage}`;
+        if (currentStudentSection !== 'ALL') url += `&section=${encodeURIComponent(currentStudentSection)}`;
+        if (currentStudentStatus !== 'ALL') url += `&academic_status=${encodeURIComponent(currentStudentStatus)}`;
+        if (currentStudentSearch) url += `&search=${encodeURIComponent(currentStudentSearch)}`;
+
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Students load failed');
+        const data = await res.json();
+        studentsLoaded = true;
+
+        const tbody = document.getElementById('studentTableBody');
+        if (!tbody) return;
+
+        const total = data.total || 0;
+        const students = data.students || [];
+
+        // Update Pagination Text
+        const startIdx = total === 0 ? 0 : (currentStudentPage - 1) * 15 + 1;
+        const endIdx = Math.min(total, currentStudentPage * 15);
+        const maxPages = Math.max(1, Math.ceil(total / 15));
+
+        document.getElementById('studentPaginationText').textContent = `Showing ${startIdx} to ${endIdx} of ${total} students`;
+        document.getElementById('currentPageNum').textContent = `Page ${currentStudentPage} of ${maxPages}`;
+        document.getElementById('prevPageBtn').disabled = (currentStudentPage <= 1);
+        document.getElementById('nextPageBtn').disabled = (currentStudentPage >= maxPages);
+
+        if (students.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-on-surface-variant font-medium">No students match current filter parameters.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = students.map(s => {
+          const initials = s.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+          const isReview = s.academic_status === 'NEEDS REVIEW';
+          const isWatch = s.academic_status === 'WATCH';
+          const statusBg = isReview 
+            ? 'bg-error-container text-on-error-container' 
+            : (isWatch ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800');
+
+          return `
+            <tr class="hover:bg-surface-container-low transition-colors">
+              <td class="py-2.5 px-3.5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-full ${isReview ? 'bg-error text-white' : (isWatch ? 'bg-amber-600 text-white' : 'bg-primary text-white')} flex items-center justify-center font-bold text-[11px]">${initials}</div>
+                  <div>
+                    <span class="font-bold text-primary block">${s.name}</span>
+                    <span class="text-[11px] text-outline font-mono">${s.registration_number}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="py-2.5 px-3 font-semibold text-on-surface">${s.section}</td>
+              <td class="py-2.5 px-3 text-right font-mono">${s.cgpa.toFixed(2)}</td>
+              <td class="py-2.5 px-3 text-right font-mono">${s.attendance_pct.toFixed(1)}%</td>
+              <td class="py-2.5 px-3 text-right font-mono ${s.internal_marks_pct < 60 ? 'text-error font-bold' : ''}">${s.internal_marks_pct.toFixed(1)}%</td>
+              <td class="py-2.5 px-3">
+                <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${statusBg}">${s.academic_status}</span>
+              </td>
+              <td class="py-2.5 px-3 text-center font-mono font-semibold">${(s.risk_probability * 100).toFixed(0)}%</td>
+              <td class="py-2.5 px-3 text-on-surface-variant font-medium">${s.mentor_name || 'Dr. Manoj Saini'}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Students error:', err);
+      }
+    }
+
+    // 3. Load Mentors Data
+    async function loadMentors() {
+      await ensureAdminSession();
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/mentor-analytics`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Mentors load failed');
+        const mentors = await res.json();
+        mentorsLoaded = true;
+
+        const container = document.getElementById('mentorCardsContainer');
+        if (!container) return;
+
+        container.innerHTML = mentors.map(m => {
+          const initials = m.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+          return `
+            <div class="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between space-y-3">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-lg bg-secondary text-white font-bold flex items-center justify-center text-xs">
+                    ${initials}
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-sm text-primary leading-tight">${m.name}</h3>
+                    <span class="text-[11px] text-outline">${m.department} • ${m.faculty_code}</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">Cap: ${m.workload_cap}</span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 py-2 border-y border-surface-container text-center text-xs">
+                <div>
+                  <span class="text-[10px] text-outline uppercase block">Mentees</span>
+                  <span class="font-bold text-primary font-mono text-sm">${m.assigned_mentees}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-amber-800 uppercase block">Pending</span>
+                  <span class="font-bold text-amber-700 font-mono text-sm">${m.pending_reviews}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-emerald-800 uppercase block">Approved</span>
+                  <span class="font-bold text-emerald-700 font-mono text-sm">${m.approved_interventions}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-on-surface-variant pt-1">
+                <span class="text-[11px]">Completed: <strong>${m.completed_interventions}</strong></span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Active Alloc</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Mentors load error:', err);
+      }
+    }
+
+    // 4. Load Model Governance
+    async function loadModelGovernance() {
+      await ensureAdminSession();
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/model-health`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Model health load failed');
+        const data = await res.json();
+        governanceLoaded = true;
+
+        if (data.metrics) {
+          const m = data.metrics;
+          const grid = document.getElementById('model-metrics-grid');
+          if (grid) {
+            grid.innerHTML = `
+              <div class="p-3 rounded-lg bg-surface-container-lowest border border-surface-container shadow-sm text-center">
+                <span class="text-[10px] text-outline uppercase font-semibold block">Recall / Sensitivity</span>
+                <span class="text-xl font-bold text-emerald-700 font-mono">${(m.recall * 100).toFixed(1)}%</span>
+              </div>
+              <div class="p-3 rounded-lg bg-surface-container-lowest border border-surface-container shadow-sm text-center">
+                <span class="text-[10px] text-outline uppercase font-semibold block">Precision</span>
+                <span class="text-xl font-bold text-primary font-mono">${(m.precision * 100).toFixed(1)}%</span>
+              </div>
+              <div class="p-3 rounded-lg bg-surface-container-lowest border border-surface-container shadow-sm text-center">
+                <span class="text-[10px] text-outline uppercase font-semibold block">F1 Score</span>
+                <span class="text-xl font-bold text-primary font-mono">${(m.f1 * 100).toFixed(1)}%</span>
+              </div>
+              <div class="p-3 rounded-lg bg-surface-container-lowest border border-surface-container shadow-sm text-center">
+                <span class="text-[10px] text-outline uppercase font-semibold block">F2 Score</span>
+                <span class="text-xl font-bold text-primary font-mono">${(m.f2 * 100).toFixed(1)}%</span>
+              </div>
+              <div class="p-3 rounded-lg bg-surface-container-lowest border border-surface-container shadow-sm text-center">
+                <span class="text-[10px] text-outline uppercase font-semibold block">ROC-AUC</span>
+                <span class="text-xl font-bold text-secondary font-mono">${m.roc_auc.toFixed(3)}</span>
+              </div>
+            `;
+          }
+        }
+
+        if (data.confusion_matrix) {
+          const cm = data.confusion_matrix;
+          document.getElementById('cm-tn').textContent = cm.true_negative;
+          document.getElementById('cm-fp').textContent = cm.false_positive;
+          document.getElementById('cm-fn').textContent = cm.false_negative;
+          document.getElementById('cm-tp').textContent = cm.true_positive;
+        }
+      } catch (err) {
+        console.error('Model health error:', err);
+      }
+    }
+
+    // 5. Load Audit Logs
+    async function loadAuditLogs() {
+      await ensureAdminSession();
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/audit-logs?limit=20`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Audit logs load failed');
+        const data = await res.json();
+        const logs = data.logs || [];
+
+        const tbody = document.getElementById('auditTableBody');
+        if (!tbody) return;
+
+        if (logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-on-surface-variant font-sans">No audit events recorded yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = logs.map(l => {
+          const dateStr = l.timestamp ? new Date(l.timestamp).toLocaleTimeString('en-US', { hour12: false }) : 'Recent';
+          return `
+            <tr class="hover:bg-surface-container-low transition-colors text-[11px]">
+              <td class="py-2 px-3.5 text-outline">#${l.id}</td>
+              <td class="py-2 px-3 text-on-surface-variant">${dateStr}</td>
+              <td class="py-2 px-3 font-semibold text-primary">${l.actor_role.toUpperCase()}</td>
+              <td class="py-2 px-3 font-bold text-secondary">${l.action}</td>
+              <td class="py-2 px-3 text-outline">${l.entity_type}</td>
+              <td class="py-2 px-3 text-on-surface font-sans truncate max-w-xs">${l.details}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Audit logs error:', err);
+      }
+    }
+
+    // Explicit Demonstration Role Switcher Bar
+    
+    // =========================================================================
+    // MASTER MENTOR GOVERNANCE & STUDENT OVERSIGHT JS ENGINE
+    // =========================================================================
+    let govSubTab = 'overview';
+    let cachedGovOverview = null;
+    let cachedGovMentors = [];
+    let cachedGovRelationships = [];
+    let cachedGovWorkload = [];
+    let cachedGovStudentDist = [];
+    let cachedGovMeetingsAnalytics = null;
+    let cachedGovInterventions = [];
+    let govWorkloadChart = null;
+    let govSupportDistChart = null;
+    let govMeetingWeeklyChart = null;
+    let govMeetingModalityChart = null;
+    let govStudentTrajChart = null;
+    let activeAdminStudentId = null;
+    let activeAdminMentorId = null;
+
+    function switchGovSubTab(tabName) {
+      govSubTab = tabName;
+      ['overview', 'mentors', 'relationships', 'meetings', 'interventions'].forEach(t => {
+        const panel = document.getElementById(`govtab-panel-${t}`);
+        if (panel) panel.classList.add('hidden');
+        const btn = document.getElementById(`govtab-btn-${t}`);
+        if (btn) {
+          btn.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm', 'font-bold');
+          btn.classList.add('text-on-surface-variant', 'font-semibold');
+        }
+      });
+
+      const activePanel = document.getElementById(`govtab-panel-${tabName}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`govtab-btn-${tabName}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-primary', 'text-on-primary', 'shadow-sm', 'font-bold');
+        activeBtn.classList.remove('text-on-surface-variant', 'font-semibold');
+      }
+
+      if (tabName === 'overview') loadGovOverview();
+      else if (tabName === 'mentors') loadGovMentors();
+      else if (tabName === 'relationships') loadGovRelationships(1);
+      else if (tabName === 'meetings') loadGovMeetings();
+      else if (tabName === 'interventions') loadGovInterventions();
+    }
+
+    function loadAdminGovernanceAll() {
+      switchGovSubTab(govSubTab);
+    }
+
+    // 1. Governance Overview Loader
+    async function loadGovOverview() {
+      await ensureAdminSession();
+      try {
+        const [resOv, resWk, resDist] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/admin/governance/overview`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/v1/admin/governance/mentor-workload`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/v1/admin/governance/student-distribution`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        if (resOv.ok) {
+          const ov = await resOv.json();
+          cachedGovOverview = ov;
+          document.getElementById('gov-kpi-mentors').textContent = ov.total_active_mentors;
+          document.getElementById('gov-kpi-assigned').textContent = ov.total_assigned_students;
+          document.getElementById('gov-kpi-active-support').textContent = ov.students_with_active_support;
+          document.getElementById('gov-kpi-awaiting-followup').textContent = ov.students_awaiting_followup;
+          document.getElementById('gov-kpi-pending-decisions').textContent = ov.pending_intervention_decisions;
+          document.getElementById('gov-kpi-overdue-followups').textContent = ov.overdue_followups_count;
+
+          // Render Attention Queue
+          const qContainer = document.getElementById('gov-attention-queue-list');
+          document.getElementById('gov-queue-count').textContent = `${ov.attention_queue.length} Cases Flagged`;
+          if (ov.attention_queue.length === 0) {
+            qContainer.innerHTML = `<div class="col-span-2 p-6 text-center text-on-surface-variant bg-surface-container-low rounded-xl">No immediate governance action items detected.</div>`;
+          } else {
+            qContainer.innerHTML = ov.attention_queue.map(item => {
+              const sevBg = item.severity === 'high' ? 'bg-red-50 text-red-800 border-red-200' : 'bg-amber-50 text-amber-800 border-amber-200';
+              return `
+                <div class="p-3.5 rounded-xl border border-surface-container bg-surface-container-lowest hover:bg-surface-container-low transition-all space-y-2 flex flex-col justify-between">
+                  <div class="flex items-start justify-between gap-2">
+                    <div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="font-bold text-xs text-primary">${item.student_name}</span>
+                        <span class="text-[10px] text-outline font-mono">(${item.registration_number})</span>
+                        <span class="text-[10px] text-on-surface-variant">• Sec ${item.section}</span>
+                      </div>
+                      <span class="text-[11px] text-on-surface-variant block mt-0.5">Mentor: <strong>${item.mentor_name}</strong></span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${sevBg}">${item.issue_type}</span>
+                  </div>
+                  <p class="text-[11px] text-on-surface leading-relaxed">${item.detail}</p>
+                  <div class="pt-2 border-t border-surface-container flex items-center justify-between">
+                    <span class="text-[10px] text-outline font-mono">${item.case_id}</span>
+                    <button onclick="openStudentGovernanceDrawer(${item.student_id})" class="text-xs font-bold text-secondary hover:underline flex items-center gap-0.5">
+                      <span>${item.action_label}</span>
+                      <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        // Render Workload Bar Chart
+        if (resWk.ok) {
+          const workloads = await resWk.json();
+          cachedGovWorkload = workloads;
+          renderGovWorkloadChart(workloads);
+        }
+
+        // Render Student Support Stacked Bar Chart
+        if (resDist.ok) {
+          const dists = await resDist.json();
+          cachedGovStudentDist = dists;
+          renderGovSupportDistChart(dists);
+        }
+
+      } catch (err) {
+        console.error('Governance overview load failed:', err);
+      }
+    }
+
+    function renderGovWorkloadChart(workloads) {
+      const canvas = document.getElementById('govWorkloadBarChart');
+      if (!canvas || !window.Chart) return;
+      if (govWorkloadChart) govWorkloadChart.destroy();
+
+      const labels = workloads.map(w => w.faculty_code);
+      const assigned = workloads.map(w => w.assigned_students);
+      const capacity = workloads.map(w => w.max_quota);
+
+      govWorkloadChart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Assigned Mentees',
+              data: assigned,
+              backgroundColor: '#0284c7',
+              borderRadius: 4,
+            },
+            {
+              label: 'Quota Cap',
+              data: capacity,
+              backgroundColor: '#e2e8f0',
+              borderRadius: 4,
+            }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  const m = workloads[ctx.dataIndex];
+                  return `${ctx.dataset.label}: ${ctx.raw} (${m.mentor_name})`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { max: 12, ticks: { stepSize: 2, font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { font: { size: 10, weight: 'bold' } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderGovSupportDistChart(dists) {
+      const canvas = document.getElementById('govSupportStackedBarChart');
+      if (!canvas || !window.Chart) return;
+      if (govSupportDistChart) govSupportDistChart.destroy();
+
+      const labels = dists.map(d => d.faculty_code);
+      const onTrack = dists.map(d => d.on_track_count);
+      const watch = dists.map(d => d.watch_count);
+      const review = dists.map(d => d.needs_review_count);
+
+      govSupportDistChart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'On Track', data: onTrack, backgroundColor: '#10b981', borderRadius: 4 },
+            { label: 'Watch', data: watch, backgroundColor: '#f59e0b', borderRadius: 4 },
+            { label: 'Needs Review', data: review, backgroundColor: '#ef4444', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' } } },
+            y: { stacked: true, max: 12, ticks: { stepSize: 2, font: { size: 10 } }, grid: { color: '#f1f5f9' } }
+          },
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                afterTitle: function(items) {
+                  const d = dists[items[0].dataIndex];
+                  return d.mentor_name;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Mentor Performance Directory & Profiles
+    async function loadGovMentors() {
+      await ensureAdminSession();
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/governance/mentors`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          cachedGovMentors = await res.json();
+          renderGovMentorCards(cachedGovMentors);
+
+          // Populate filter dropdown in relationships tab
+          const relMentorSelect = document.getElementById('gov-rel-mentor-filter');
+          if (relMentorSelect) {
+            relMentorSelect.innerHTML = '<option value="ALL">All Faculty Mentors</option>' +
+              cachedGovMentors.map(m => `<option value="${m.mentor_id}">${m.name} (${m.faculty_code})</option>`).join('');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load mentor directory:', err);
+      }
+    }
+
+    function renderGovMentorCards(mentors) {
+      const container = document.getElementById('govMentorDirectoryGrid');
+      if (!container) return;
+      if (mentors.length === 0) {
+        container.innerHTML = `<div class="col-span-3 p-8 text-center text-on-surface-variant bg-surface-container-low rounded-xl">No mentors matched search filters.</div>`;
+        return;
+      }
+
+      container.innerHTML = mentors.map(m => {
+        const initials = m.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        return `
+          <div class="p-4 rounded-xl bg-surface-container-lowest border border-surface-container shadow-sm flex flex-col justify-between space-y-3.5 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-primary text-white font-bold flex items-center justify-center text-xs">
+                  ${initials}
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm text-primary leading-tight">${m.name}</h3>
+                  <span class="text-[11px] text-outline">${m.faculty_code} • ${m.designation}</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold">${m.capacity_utilization_pct}% Load</span>
+            </div>
+
+            <!-- Student Cohort Health Row -->
+            <div class="grid grid-cols-3 gap-1.5 py-2 border-y border-surface-container text-center text-xs">
+              <div class="bg-emerald-50 text-emerald-800 rounded p-1.5">
+                <span class="text-[10px] block opacity-80 uppercase">On Track</span>
+                <span class="font-extrabold text-xs font-mono">${m.on_track_count}</span>
+              </div>
+              <div class="bg-amber-50 text-amber-800 rounded p-1.5">
+                <span class="text-[10px] block opacity-80 uppercase">Watch</span>
+                <span class="font-extrabold text-xs font-mono">${m.watch_count}</span>
+              </div>
+              <div class="bg-red-50 text-red-800 rounded p-1.5">
+                <span class="text-[10px] block opacity-80 uppercase">Review</span>
+                <span class="font-extrabold text-xs font-mono">${m.needs_review_count}</span>
+              </div>
+            </div>
+
+            <!-- Tasks & Sessions Activity -->
+            <div class="grid grid-cols-2 gap-2 text-xs text-on-surface-variant">
+              <div>
+                <span class="text-[10px] text-outline block">Tasks In-Flight / Done</span>
+                <span class="font-bold text-primary font-mono">${m.pending_tasks} Active / ${m.completed_tasks} Done</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-outline block">Recorded Sessions</span>
+                <span class="font-bold text-secondary font-mono">${m.total_meetings} meetings</span>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="pt-1 flex items-center justify-between">
+              <span class="text-[10px] text-outline">${m.assigned_students} Allocated Mentees</span>
+              <button onclick="openMentorGovernanceDrawer(${m.mentor_id})" class="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-primary hover:text-white text-xs font-bold text-primary transition-all flex items-center gap-1">
+                <span>Governance Profile</span>
+                <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterGovMentors() {
+      const term = (document.getElementById('gov-mentor-search')?.value || '').toLowerCase().trim();
+      const dept = document.getElementById('gov-mentor-dept-filter')?.value || 'ALL';
+
+      const filtered = cachedGovMentors.filter(m => {
+        const matchesTerm = !term || m.name.toLowerCase().includes(term) || m.faculty_code.toLowerCase().includes(term);
+        const matchesDept = dept === 'ALL' || m.department === dept;
+        return matchesTerm && matchesDept;
+      });
+      renderGovMentorCards(filtered);
+    }
+
+    // 3. Mentor Profile Slide-over Drawer
+    async function openMentorGovernanceDrawer(mentorId) {
+      activeAdminMentorId = mentorId;
+      const backdrop = document.getElementById('admin-mentor-drawer-backdrop');
+      const drawer = document.getElementById('admin-mentor-drawer');
+      if (!drawer || !backdrop) return;
+
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        backdrop.classList.remove('opacity-0');
+        drawer.classList.remove('translate-x-full');
+      }, 10);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/governance/mentors/${mentorId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const prof = await res.json();
+          document.getElementById('gov-drawer-m-name').textContent = prof.name;
+          document.getElementById('gov-drawer-m-code').textContent = prof.faculty_code;
+          document.getElementById('gov-drawer-m-meta').textContent = `${prof.designation} • ${prof.department}`;
+          document.getElementById('gov-drawer-m-avatar').textContent = prof.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+
+          // Group 1: Assigned cohort
+          document.getElementById('gov-drawer-m-cohort-count').textContent = `${prof.total_assigned_students} Students`;
+          document.getElementById('gov-drawer-m-avg-att').textContent = `${prof.avg_attendance_pct}%`;
+          document.getElementById('gov-drawer-m-avg-ass').textContent = `${prof.avg_assessment_pct}%`;
+          document.getElementById('gov-drawer-m-attention').textContent = `${prof.students_requiring_attention} Students`;
+          document.getElementById('gov-drawer-m-ontrack').textContent = `${prof.cohort_status_distribution.on_track} On Track`;
+          document.getElementById('gov-drawer-m-watch').textContent = `${prof.cohort_status_distribution.watch} Watch`;
+          document.getElementById('gov-drawer-m-review').textContent = `${prof.cohort_status_distribution.needs_review} Needs Review`;
+
+          // Group 2: Support Tasks
+          document.getElementById('gov-drawer-m-tasks-assigned').textContent = prof.tasks_assigned;
+          document.getElementById('gov-drawer-m-tasks-completed').textContent = prof.tasks_completed;
+          document.getElementById('gov-drawer-m-tasks-progress').textContent = prof.tasks_in_progress;
+          document.getElementById('gov-drawer-m-tasks-overdue').textContent = prof.tasks_overdue;
+
+          // Group 3: Meetings & Engagement
+          document.getElementById('gov-drawer-m-meetings-total').textContent = prof.total_meetings;
+          document.getElementById('gov-drawer-m-meetings-unique').textContent = `${prof.unique_students_met} / ${prof.total_assigned_students}`;
+          document.getElementById('gov-drawer-m-meetings-overdue').textContent = prof.followups_overdue;
+
+          // Weekly Cadence Boxes
+          const gridEl = document.getElementById('gov-drawer-m-weekly-grid');
+          if (gridEl && prof.meeting_frequency_weekly) {
+            gridEl.innerHTML = Object.entries(prof.meeting_frequency_weekly).map(([wk, count]) => `
+              <div class="p-2 rounded bg-surface-container border border-surface-container ${count > 0 ? 'bg-secondary/15 font-bold text-secondary' : 'text-outline'}">
+                <span class="text-[9px] block uppercase">${wk}</span>
+                <span>${count}</span>
+              </div>
+            `).join('');
+          }
+
+          // Group 4: Interventions
+          document.getElementById('gov-drawer-m-inv-awaiting').textContent = prof.recommendations_awaiting_approval;
+          document.getElementById('gov-drawer-m-inv-approved').textContent = prof.approved_interventions;
+          document.getElementById('gov-drawer-m-inv-dismissed').textContent = prof.dismissed_recommendations;
+          document.getElementById('gov-drawer-m-inv-completed').textContent = prof.completed_interventions;
+        }
+      } catch (err) {
+        console.error('Failed to load mentor profile:', err);
+      }
+    }
+
+    function closeMentorGovernanceDrawer() {
+      const backdrop = document.getElementById('admin-mentor-drawer-backdrop');
+      const drawer = document.getElementById('admin-mentor-drawer');
+      if (!drawer || !backdrop) return;
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('opacity-0');
+      setTimeout(() => backdrop.classList.add('hidden'), 300);
+      activeAdminMentorId = null;
+    }
+
+    // 4. Student-Mentor Relationships Matrix
+    async function loadGovRelationships(page = 1) {
+      await ensureAdminSession();
+      const search = document.getElementById('gov-rel-search')?.value.trim() || '';
+      const section = document.getElementById('gov-rel-section-filter')?.value || 'ALL';
+      const mentorId = document.getElementById('gov-rel-mentor-filter')?.value || 'ALL';
+      const status = document.getElementById('gov-rel-status-filter')?.value || 'ALL';
+
+      let url = `${API_BASE}/api/v1/admin/governance/relationships?page=${page}&page_size=15`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (section !== 'ALL') url += `&section=${encodeURIComponent(section)}`;
+      if (mentorId !== 'ALL') url += `&mentor_id=${encodeURIComponent(mentorId)}`;
+      if (status !== 'ALL') url += `&status_filter=${encodeURIComponent(status)}`;
+
+      try {
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          cachedGovRelationships = data.relationships;
+          renderGovRelationshipsTable(data.relationships);
+          renderGovRelPagination(data.total, data.page, data.page_size);
+        }
+      } catch (err) {
+        console.error('Failed to load relationships:', err);
+      }
+    }
+
+    function renderGovRelationshipsTable(rels) {
+      const tbody = document.getElementById('govRelationshipsTableBody');
+      if (!tbody) return;
+      if (rels.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="py-6 text-center text-outline italic">No student-mentor relationships matched the filters.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rels.map(r => {
+        let statusBadge = 'bg-emerald-50 text-emerald-800 border border-emerald-200';
+        if (r.academic_status === 'WATCH') statusBadge = 'bg-amber-50 text-amber-800 border border-amber-200';
+        else if (r.academic_status === 'NEEDS REVIEW') statusBadge = 'bg-red-50 text-red-800 border border-red-200';
+
+        let supportBadge = 'bg-slate-100 text-slate-700';
+        if (r.support_status === 'Attention Required') supportBadge = 'bg-red-100 text-red-800 font-bold';
+        else if (r.support_status === 'Active Recovery') supportBadge = 'bg-blue-100 text-blue-800 font-bold';
+        else if (r.support_status === 'Active Mentoring') supportBadge = 'bg-emerald-100 text-emerald-800 font-bold';
+
+        const lastMeetStr = r.last_meeting_date ? new Date(r.last_meeting_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '<span class="text-outline italic">None</span>';
+        const nextFollowStr = r.next_followup_date ? new Date(r.next_followup_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '<span class="text-outline italic">None</span>';
+
+        return `
+          <tr class="hover:bg-surface-container-low transition-colors">
+            <td class="py-2.5 px-3">
+              <span class="font-bold text-primary block">${r.student_name}</span>
+              <span class="text-[10px] text-outline font-mono">${r.registration_number}</span>
+            </td>
+            <td class="py-2.5 px-3 font-mono">${r.section}</td>
+            <td class="py-2.5 px-3">
+              <span class="font-semibold text-primary block">${r.mentor_name || 'Unassigned'}</span>
+              <span class="text-[10px] text-outline">${r.faculty_code || ''}</span>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusBadge}">${r.academic_status}</span>
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono font-semibold">${r.attendance_pct}%</td>
+            <td class="py-2.5 px-3 text-center font-mono font-semibold">${r.assessment_pct}%</td>
+            <td class="py-2.5 px-3 text-center font-mono">
+              <span class="text-primary font-bold">${r.active_tasks_count}</span> / <span class="text-emerald-700">${r.completed_tasks_count}</span>
+            </td>
+            <td class="py-2.5 px-3">${lastMeetStr}</td>
+            <td class="py-2.5 px-3">${nextFollowStr}</td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded text-[10px] ${supportBadge}">${r.support_status}</span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="openStudentGovernanceDrawer(${r.student_id})" class="px-2.5 py-1 rounded bg-surface-container hover:bg-primary hover:text-white text-xs font-semibold text-primary transition-colors">
+                Inspect
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderGovRelPagination(total, page, pageSize) {
+      const countEl = document.getElementById('gov-rel-count-text');
+      const btnsEl = document.getElementById('gov-rel-pagination-btns');
+      if (countEl) countEl.textContent = `Showing ${Math.min(total, (page-1)*pageSize + 1)}–${Math.min(total, page*pageSize)} of ${total} records`;
+
+      if (btnsEl) {
+        const totalPages = Math.ceil(total / pageSize);
+        btnsEl.innerHTML = `
+          <button onclick="loadGovRelationships(${Math.max(1, page - 1)})" ${page <= 1 ? 'disabled class="opacity-50"' : 'class="hover:bg-surface-container"'} class="px-2.5 py-1 border border-surface-container rounded text-xs">Prev</button>
+          <span class="font-mono text-xs px-2">${page} / ${totalPages}</span>
+          <button onclick="loadGovRelationships(${Math.min(totalPages, page + 1)})" ${page >= totalPages ? 'disabled class="opacity-50"' : 'class="hover:bg-surface-container"'} class="px-2.5 py-1 border border-surface-container rounded text-xs">Next</button>
+        `;
+      }
+    }
+
+    function filterGovRelationships() {
+      loadGovRelationships(1);
+    }
+
+    // 5. Student Governance Detail Slide-over Drawer
+    async function openStudentGovernanceDrawer(studentId) {
+      activeAdminStudentId = studentId;
+      const backdrop = document.getElementById('admin-student-drawer-backdrop');
+      const drawer = document.getElementById('admin-student-drawer');
+      if (!drawer || !backdrop) return;
+
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        backdrop.classList.remove('opacity-0');
+        drawer.classList.remove('translate-x-full');
+      }, 10);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/governance/students/${studentId}/governance`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const s = await res.json();
+          document.getElementById('gov-drawer-s-name').textContent = s.name;
+          document.getElementById('gov-drawer-s-avatar').textContent = s.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+          document.getElementById('gov-drawer-s-meta').textContent = `Reg #${s.registration_number} • Section ${s.section} • CGPA: ${s.cgpa} • Att: ${s.attendance_pct}%`;
+          
+          const badgeEl = document.getElementById('gov-drawer-s-badge');
+          badgeEl.textContent = s.academic_status;
+          badgeEl.className = `px-2 py-0.5 rounded text-[10px] font-bold ${s.academic_status === 'NEEDS REVIEW' ? 'bg-red-50 text-red-800 border border-red-200' : (s.academic_status === 'WATCH' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200')}`;
+
+          document.getElementById('gov-drawer-s-mentor-name').textContent = s.mentor_name || 'Unassigned';
+          document.getElementById('gov-drawer-s-mentor-code').textContent = `Faculty Code: ${s.faculty_code || 'N/A'} • ${s.department}`;
+
+          // Render Trajectory Chart
+          renderGovStudentTrajChart(s.observed_trajectory, s.projected_trajectory);
+
+          // Render Weak Subjects
+          const weakContainer = document.getElementById('gov-drawer-s-weak-subjects');
+          if (s.weak_subjects.length === 0) {
+            weakContainer.innerHTML = `<div class="p-2.5 bg-emerald-50 text-emerald-800 rounded-lg text-xs font-semibold">No critical academic deficits (&gt;75% across all courses).</div>`;
+          } else {
+            weakContainer.innerHTML = s.weak_subjects.map(w => `
+              <div class="p-2.5 rounded-lg border border-surface-container bg-surface-container-low flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-primary block">${w.subject_code} - ${w.subject_name}</span>
+                  <span class="text-[10px] text-outline">Benchmark Target: 75.0%</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${w.marks_pct < 75 ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-emerald-50 text-emerald-800'}">Marks: ${w.marks_pct}%</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold ${w.attendance_pct < 75 ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-emerald-50 text-emerald-800'}">Att: ${w.attendance_pct}%</span>
+                </div>
+              </div>
+            `).join('');
+          }
+
+          // Render Mentoring Meetings Timeline
+          const meetContainer = document.getElementById('gov-drawer-s-meetings-list');
+          document.getElementById('gov-drawer-s-meet-count').textContent = `${s.meetings.length} sessions`;
+          if (s.meetings.length === 0) {
+            meetContainer.innerHTML = `<div class="p-3 bg-surface-container-low rounded-lg text-outline italic text-center">No mentoring sessions recorded for this student.</div>`;
+          } else {
+            meetContainer.innerHTML = s.meetings.map(m => {
+              const dStr = new Date(m.meeting_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              return `
+                <div class="p-3 rounded-lg border border-surface-container bg-surface-container-low space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-primary flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px] text-secondary">event</span>
+                      <span>${dStr} (${m.meeting_type})</span>
+                    </span>
+                    <span class="text-[10px] text-outline font-mono">${m.duration_minutes} mins</span>
+                  </div>
+                  <p class="text-on-surface leading-relaxed">${m.discussion_summary}</p>
+                  ${m.agreed_actions ? `<div class="text-[11px] text-secondary font-medium"><strong>Agreed:</strong> ${m.agreed_actions}</div>` : ''}
+                </div>
+              `;
+            }).join('');
+          }
+
+          // Render Tasks
+          const taskContainer = document.getElementById('gov-drawer-s-tasks-list');
+          document.getElementById('gov-drawer-s-tasks-count').textContent = `${s.tasks.length} tasks`;
+          if (s.tasks.length === 0) {
+            taskContainer.innerHTML = `<div class="p-3 bg-surface-container-low rounded-lg text-outline italic text-center">No active tasks assigned to this student.</div>`;
+          } else {
+            taskContainer.innerHTML = s.tasks.map(t => `
+              <div class="p-2.5 rounded-lg border border-surface-container bg-surface-container-low flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-primary block">${t.title}</span>
+                  <span class="text-[10px] text-outline">${t.course_code || 'General'} • Priority: ${t.priority}</span>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.status === 'completed' ? 'bg-emerald-50 text-emerald-800' : 'bg-blue-50 text-blue-800'}">${t.status}</span>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load student governance drawer:', err);
+      }
+    }
+
+    function renderGovStudentTrajChart(observed, projected) {
+      const canvas = document.getElementById('govStudentTrajChartCanvas');
+      if (!canvas || !window.Chart) return;
+      if (govStudentTrajChart) govStudentTrajChart.destroy();
+
+      const labels = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'];
+      const obsScores = [null, null, null, null, null, null, null, null];
+      observed.forEach(o => {
+        if (o.week_number <= 8) obsScores[o.week_number - 1] = o.assessment_score;
+      });
+
+      const projScores = [null, null, null, null, null, null, null, null];
+      if (observed.length > 0) {
+        const lastObs = observed[observed.length - 1];
+        if (lastObs.week_number <= 8) projScores[lastObs.week_number - 1] = lastObs.assessment_score;
+      }
+      projected.forEach(p => {
+        if (p.week_number <= 8) projScores[p.week_number - 1] = p.assessment_score;
+      });
+
+      govStudentTrajChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Observed Scores',
+              data: obsScores,
+              borderColor: '#0284c7',
+              backgroundColor: '#0284c7',
+              borderWidth: 2,
+              tension: 0.2,
+              pointRadius: 3,
+            },
+            {
+              label: 'Model Projected',
+              data: projScores,
+              borderColor: '#94a3b8',
+              backgroundColor: '#94a3b8',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              tension: 0.2,
+              pointRadius: 3,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 40, max: 100, ticks: { stepSize: 15, font: { size: 9 } }, grid: { color: '#f1f5f9' } },
+            x: { ticks: { font: { size: 9 } }, grid: { display: false } }
+          },
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } }
+          }
+        }
+      });
+    }
+
+    function closeStudentGovernanceDrawer() {
+      const backdrop = document.getElementById('admin-student-drawer-backdrop');
+      const drawer = document.getElementById('admin-student-drawer');
+      if (!drawer || !backdrop) return;
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('opacity-0');
+      setTimeout(() => backdrop.classList.add('hidden'), 300);
+      activeAdminStudentId = null;
+    }
+
+    // 6. Meeting & Follow-up Monitoring
+    async function loadGovMeetings() {
+      await ensureAdminSession();
+      try {
+        const [resAn, resFol, resList] = await Promise.all([
+          fetch(`${API_BASE}/api/v1/admin/governance/meetings/analytics`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/v1/admin/governance/followups`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/api/v1/admin/governance/meetings?page=1&page_size=20`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        if (resAn.ok) {
+          const an = await resAn.json();
+          cachedGovMeetingsAnalytics = an;
+          document.getElementById('gov-meet-total').textContent = an.total_meetings;
+          document.getElementById('gov-meet-unique').textContent = an.unique_students_met;
+          const covPct = ((an.unique_students_met / 60) * 100).toFixed(0);
+          document.getElementById('gov-meet-coverage-pct').textContent = `${covPct}% Mentee Reach`;
+          document.getElementById('gov-meet-upcoming').textContent = an.upcoming_followups_count;
+          document.getElementById('gov-meet-overdue').textContent = an.overdue_followups_count;
+
+          renderGovMeetingWeeklyChart(an.weekly_frequency);
+          renderGovMeetingModalityChart(an.meetings_by_modality);
+        }
+
+        if (resFol.ok) {
+          const followups = await resFol.json();
+          renderGovFollowupsQueue(followups);
+        }
+
+        if (resList.ok) {
+          const listData = await resList.json();
+          renderGovAllMeetingsTable(listData.meetings);
+        }
+
+      } catch (err) {
+        console.error('Failed to load meetings data:', err);
+      }
+    }
+
+    function renderGovMeetingWeeklyChart(freq) {
+      const canvas = document.getElementById('govMeetingWeeklyChart');
+      if (!canvas || !window.Chart) return;
+      if (govMeetingWeeklyChart) govMeetingWeeklyChart.destroy();
+
+      const labels = Object.keys(freq || {});
+      const data = Object.values(freq || {});
+
+      govMeetingWeeklyChart = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Recorded Sessions',
+            data: data,
+            backgroundColor: '#0284c7',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { ticks: { stepSize: 1, font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+            x: { ticks: { font: { size: 10, weight: 'bold' } }, grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderGovMeetingModalityChart(modalities) {
+      const canvas = document.getElementById('govMeetingModalityChart');
+      if (!canvas || !window.Chart) return;
+      if (govMeetingModalityChart) govMeetingModalityChart.destroy();
+
+      const labels = Object.keys(modalities || {});
+      const data = Object.values(modalities || {});
+
+      govMeetingModalityChart = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: ['#0284c7', '#38bdf8', '#94a3b8'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    function renderGovFollowupsQueue(followups) {
+      const tbody = document.getElementById('govFollowupsTableBody');
+      const countEl = document.getElementById('gov-followups-queue-count');
+      if (countEl) countEl.textContent = `${followups.length} Scheduled`;
+      if (!tbody) return;
+
+      if (followups.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-5 text-center text-outline italic">No follow-up check-ins currently pending across the university.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = followups.map(f => {
+        const mDate = new Date(f.meeting_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const fDate = new Date(f.next_followup_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isOver = f.status === 'Overdue';
+        const badge = isOver ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200';
+
+        return `
+          <tr class="hover:bg-surface-container-low transition-colors text-xs">
+            <td class="py-2.5 px-3">
+              <span class="font-bold text-primary block">${f.student_name}</span>
+              <span class="text-[10px] text-outline font-mono">${f.registration_number}</span>
+            </td>
+            <td class="py-2.5 px-3 font-mono">${f.section}</td>
+            <td class="py-2.5 px-3 text-on-surface-variant font-medium">${f.mentor_name}</td>
+            <td class="py-2.5 px-3 text-outline">${mDate}</td>
+            <td class="py-2.5 px-3 font-bold text-primary">${fDate}</td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badge}">${f.status} (${Math.abs(f.days_difference)}d)</span>
+            </td>
+            <td class="py-2.5 px-3 text-on-surface truncate max-w-xs">${f.agreed_actions || 'Standard progress monitoring'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderGovAllMeetingsTable(meetings) {
+      const tbody = document.getElementById('govAllMeetingsTableBody');
+      const emptyEl = document.getElementById('gov-meetings-empty-state');
+      if (!tbody) return;
+
+      if (meetings.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+      if (emptyEl) emptyEl.classList.add('hidden');
+
+      tbody.innerHTML = meetings.map(m => {
+        const mDate = new Date(m.meeting_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const fDate = m.next_followup_date ? new Date(m.next_followup_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '<span class="text-outline italic">None</span>';
+        return `
+          <tr class="hover:bg-surface-container-low transition-colors text-xs">
+            <td class="py-2.5 px-3 font-medium text-primary">${mDate}</td>
+            <td class="py-2.5 px-3">
+              <span class="font-bold text-primary block">${m.student_name}</span>
+              <span class="text-[10px] text-outline font-mono">${m.registration_number}</span>
+            </td>
+            <td class="py-2.5 px-3">${m.mentor_name} (${m.faculty_code})</td>
+            <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-surface-container text-[10px] font-semibold">${m.meeting_type}</span></td>
+            <td class="py-2.5 px-3 text-on-surface leading-snug">${m.discussion_summary}</td>
+            <td class="py-2.5 px-3 text-secondary font-medium">${m.agreed_actions || '<span class="text-outline italic">None</span>'}</td>
+            <td class="py-2.5 px-3 text-center">${fDate}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 7. Intervention Oversight & Review Actions
+    async function loadGovInterventions() {
+      await ensureAdminSession();
+      const statusFilter = document.getElementById('gov-inv-status-filter')?.value || '';
+      let url = `${API_BASE}/api/v1/admin/governance/interventions`;
+      if (statusFilter) url += `?status_filter=${encodeURIComponent(statusFilter)}`;
+
+      try {
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.ok) {
+          cachedGovInterventions = await res.json();
+          renderGovInterventionsTable(cachedGovInterventions);
+
+          // Update counters
+          const total = cachedGovInterventions.length;
+          const proposed = cachedGovInterventions.filter(i => i.status === 'proposed').length;
+          const approved = cachedGovInterventions.filter(i => i.status === 'approved' || i.status === 'in_progress').length;
+          const completed = cachedGovInterventions.filter(i => i.status === 'completed').length;
+          const rejected = cachedGovInterventions.filter(i => i.status === 'rejected').length;
+
+          document.getElementById('gov-inv-total').textContent = total;
+          document.getElementById('gov-inv-proposed').textContent = proposed;
+          document.getElementById('gov-inv-approved').textContent = approved;
+          document.getElementById('gov-inv-completed').textContent = completed;
+          document.getElementById('gov-inv-rejected').textContent = rejected;
+        }
+      } catch (err) {
+        console.error('Failed to load interventions:', err);
+      }
+    }
+
+    function renderGovInterventionsTable(invs) {
+      const tbody = document.getElementById('govInterventionsTableBody');
+      if (!tbody) return;
+      if (invs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-outline italic">No intervention records matching the criteria.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = invs.map(i => {
+        let statusBadge = 'bg-blue-50 text-blue-800';
+        if (i.status === 'completed') statusBadge = 'bg-emerald-50 text-emerald-800';
+        else if (i.status === 'rejected') statusBadge = 'bg-slate-100 text-slate-700';
+        else if (i.status === 'proposed') statusBadge = 'bg-amber-50 text-amber-800 font-bold';
+
+        return `
+          <tr class="hover:bg-surface-container-low transition-colors text-xs">
+            <td class="py-2.5 px-3">
+              <span class="font-bold text-primary block">${i.student_name}</span>
+              <span class="text-[10px] text-outline font-mono">${i.registration_number}</span>
+            </td>
+            <td class="py-2.5 px-3 text-on-surface-variant font-medium">${i.mentor_name}</td>
+            <td class="py-2.5 px-3">
+              <span class="font-bold text-primary block">${i.intervention_type}</span>
+              <span class="text-[10px] text-secondary font-mono">${i.course_code || 'General'}</span>
+            </td>
+            <td class="py-2.5 px-3 text-on-surface truncate max-w-xs">${i.reason}</td>
+            <td class="py-2.5 px-3 text-on-surface-variant leading-snug">${i.recommendation}</td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${i.priority === 'High' ? 'bg-red-50 text-red-800' : 'bg-slate-100 text-slate-700'}">${i.priority}</span>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusBadge}">${i.status}</span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="openAdminInterventionModal(${i.id}, '${i.student_name.replace(/'/g, "\'")}', '${i.mentor_name.replace(/'/g, "\'")}')" class="px-2.5 py-1 rounded bg-surface-container hover:bg-primary hover:text-white text-xs font-semibold text-primary transition-colors">
+                Review / Flag
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openAdminInterventionModal(invId, studentName, mentorName) {
+      document.getElementById('modal-inv-id').value = invId;
+      document.getElementById('modal-inv-subtitle').textContent = `Intervention #${invId} for ${studentName} (Mentor: ${mentorName})`;
+      document.getElementById('modal-inv-note').value = '';
+      document.getElementById('admin-intervention-modal').classList.remove('hidden');
+    }
+
+    function closeAdminInterventionModal() {
+      document.getElementById('admin-intervention-modal').classList.add('hidden');
+    }
+
+    async function submitAdminInterventionReview(e) {
+      e.preventDefault();
+      const invId = document.getElementById('modal-inv-id').value;
+      const action = document.getElementById('modal-inv-action').value;
+      const note = document.getElementById('modal-inv-note').value.trim();
+      if (!invId || !note) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/admin/governance/interventions/${invId}/review`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ action: action, note: note })
+        });
+
+        if (!res.ok) throw new Error('Administrative review action failed.');
+        alert('Administrative oversight action recorded in institutional audit log.');
+        closeAdminInterventionModal();
+        loadGovInterventions();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderRoleSwitcher() {
+      const bar = document.createElement('div');
+      bar.id = 'role-switcher-bar';
+      bar.innerHTML = `
+        <div style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; align-items: center; gap: 8px; background: rgba(43, 38, 35, 0.94); backdrop-filter: blur(14px); padding: 7px 16px; border-radius: 9999px; box-shadow: 0 16px 36px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.18); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px;">
+          <span style="color: #fed7aa; font-weight: 700; margin-right: 4px; display: flex; align-items: center; gap: 5px;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #f97316; display: inline-block;"></span> [Demo Switcher]
+          </span>
+          <a href="${isFile ? 'student.html' : '/student'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Student</a>
+          <a href="${isFile ? 'mentor.html' : '/mentor'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Mentor</a>
+          <a href="${isFile ? 'admin.html' : '/admin'}" style="color: #ffffff; text-decoration: none; padding: 4px 11px; border-radius: 9999px; background: #ea580c; font-weight: 700; box-shadow: 0 2px 8px rgba(234,88,12,0.4);">Admin</a>
+          <a href="${isFile ? 'lab.html' : '/lab'}" style="color: #d6d3d1; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(255,255,255,0.1); font-weight: 600;">Lab</a>
+          <a href="${isFile ? 'login.html' : '/login'}" onclick="logout(); return false;" style="color: #fca5a5; text-decoration: none; padding: 4px 10px; border-radius: 9999px; background: rgba(239,68,68,0.18); font-weight: 600; margin-left: 4px;">Logout</a>
+        </div>
+      `;
+      document.body.appendChild(bar);
+    }
+
+    renderRoleSwitcher();
+    loadAdminOverview();
+  </script>
+</body>
+</html>
